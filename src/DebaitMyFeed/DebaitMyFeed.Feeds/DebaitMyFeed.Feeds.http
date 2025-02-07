@@ -1,0 +1,6 @@
+@HostAddress = http://localhost:5121
+
+GET {{HostAddress}}/dr.dk/indland
+Accept: application/rss+xml
+
+###
