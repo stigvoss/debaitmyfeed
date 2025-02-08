@@ -25,7 +25,7 @@ public class JvArticleTextExtractor : IArticleTextExtractor
         
         if (premiumElement is not null)
         {
-            return PremiumArticle;
+            //return PremiumArticle;
         }
         
         IElement? articleResourceElement = document.QuerySelector("script#personalised-content-script");
