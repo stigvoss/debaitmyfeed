@@ -1,6 +1,8 @@
 using System.ServiceModel.Syndication;
 using System.Xml;
 using DebaitMyFeed.Library;
+using DebaitMyFeed.Library.DrDk;
+using DebaitMyFeed.Library.JvDk;
 using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,11 +12,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
-builder.Services.AddSingleton<IArticleTextExtractor, DrArticleTextExtractor>();
-builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
-builder.Services.AddSingleton<IFeedDebaiter, DrDkFeedDebaiter>();
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
+
+builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
+builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
+
+builder.Services.AddKeyedSingleton<IArticleTextExtractor, DrArticleTextExtractor>("DrDk");
+builder.Services.AddKeyedSingleton<IFeedDebaiter, DrDkFeedDebaiter>("DrDk");
+
+builder.Services.AddKeyedSingleton<IArticleTextExtractor, JvArticleTextExtractor>("JvDk");
+builder.Services.AddKeyedSingleton<IFeedDebaiter, JvDkFeedDebaiter>("JvDk");
 
 var app = builder.Build();
 
@@ -27,7 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/dr.dk/{feedName}",
         async (
-            IFeedDebaiter debaiter,
+            [FromKeyedServices("DrDk")]IFeedDebaiter debaiter,
             string feedName) =>
         {
             string[] validFeedNames =
@@ -60,11 +68,9 @@ app.MapGet("/dr.dk/{feedName}",
     .WithName("DrFeeds")
     .WithOpenApi();
 
-
-
 app.MapGet("/dr.dk/regionale/{feedName}",
         async (
-            IFeedDebaiter debaiter,
+            [FromKeyedServices("DrDk")]IFeedDebaiter debaiter,
             string feedName) =>
         {
             string[] validFeedNames =
@@ -92,6 +98,46 @@ app.MapGet("/dr.dk/regionale/{feedName}",
             return Results.Bytes(feed, "application/rss+xml");
         })
     .WithName("DrRegionalFeeds")
+    .WithOpenApi();
+
+app.MapGet("/jv.dk/{feedName}",
+        async (
+            [FromKeyedServices("JvDk")]IFeedDebaiter debaiter,
+            string feedName) =>
+        {
+            string[] validFeedNames =
+            [    
+                "forside",
+                "danmark",
+                "erhverv",
+                "sport",
+                "esbjerg-fb",
+                "soenderjyske",
+                "kolding-if",
+                "aabenraa",
+                "billund",
+                "esbjerg",
+                "responsys",
+                "haderslev",
+                "kolding",
+                "soenderborg",
+                "toender",
+                "varde",
+                "vejen"
+            ];
+            
+            if (!validFeedNames.Contains(feedName))
+            {
+                return Results.BadRequest("Invalid feed name");
+            }
+
+            string url = $"https://jv.dk/feed/{feedName}";
+            
+            ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
+
+            return Results.Bytes(feed, "application/rss+xml");
+        })
+    .WithName("JvFeeds")
     .WithOpenApi();
 
 app.Run();

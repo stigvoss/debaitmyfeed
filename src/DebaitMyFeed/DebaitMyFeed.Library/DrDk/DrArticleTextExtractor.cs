@@ -1,15 +1,15 @@
 using AngleSharp;
 using AngleSharp.Dom;
 
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.DrDk;
 
 public class DrArticleTextExtractor : IArticleTextExtractor
 {
     private readonly HttpClient client;
 
-    public DrArticleTextExtractor()
+    public DrArticleTextExtractor(HttpClient client)
     {
-        this.client = new HttpClient();
+        this.client = client;
     }
     
     public async Task<string?> ExtractTextAsync(Uri uri)
