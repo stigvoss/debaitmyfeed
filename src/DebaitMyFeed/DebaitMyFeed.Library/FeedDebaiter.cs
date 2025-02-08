@@ -2,25 +2,26 @@ using System.ServiceModel.Syndication;
 using System.Text;
 using System.Xml;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace DebaitMyFeed.Library.JvDk;
+namespace DebaitMyFeed.Library;
 
-public class JvDkFeedDebaiter : IFeedDebaiter
+public abstract class FeedDebaiter : IFeedDebaiter
 {
-    private readonly IArticleTextExtractor extractor;
     private readonly IHeadlineSuggestionStrategy suggestionStrategy;
     private readonly IMemoryCache cache;
+    private readonly ILogger<FeedDebaiter> logger;
 
-    public JvDkFeedDebaiter(
-        [FromKeyedServices("JvDk")]IArticleTextExtractor extractor,
+    public FeedDebaiter(
         IHeadlineSuggestionStrategy suggestionStrategy,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        ILogger<FeedDebaiter> logger)
     {
-        this.extractor = extractor;
         this.suggestionStrategy = suggestionStrategy;
         this.cache = cache;
+        this.logger = logger;
     }
+    
     public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(string feedUrl)
     {
         XmlReader reader = XmlReader.Create(feedUrl);
@@ -38,27 +39,27 @@ public class JvDkFeedDebaiter : IFeedDebaiter
                 {
                     return;
                 }
-                
-                string? articleText = await extractor.ExtractTextAsync(uri);
 
-                if (articleText is null)
+                try
                 {
-                    return;
-                }
+                    Article article = await GetArticleAsync(item.Title.Text, item.PublishDate, uri);
 
-                string? headline;
-                if (articleText == JvArticleTextExtractor.PremiumArticle)
+                    string? headline = await suggestionStrategy.SuggestHeadlineAsync(article);
+
+                    // Indicate that the article requires a subscription in the headline.
+                    if (article.RequiresSubscription)
+                    {
+                        headline = $"\ud83d\udcb6 {headline}";
+                    }
+
+                    cache.Set(item.Id, headline, TimeSpan.FromDays(7));
+
+                    item.Title = new TextSyndicationContent(headline);
+                } 
+                catch (Exception ex)
                 {
-                    headline = $"[P] {item.Title.Text}";
+                    this.logger.LogError(ex, "Failed to debait article {ArticleId}", item.Id);
                 }
-                else
-                {
-                    headline = await suggestionStrategy.SuggestHeadlineAsync(articleText);
-                }
-
-                cache.Set(item.Id, headline, TimeSpan.FromDays(7));
-
-                item.Title = new TextSyndicationContent(headline);
             }
         });
 
@@ -75,4 +76,6 @@ public class JvDkFeedDebaiter : IFeedDebaiter
 
         return stream.ToArray();
     }
+
+    protected abstract Task<Article> GetArticleAsync(string headline, DateTimeOffset published, Uri uri);
 }

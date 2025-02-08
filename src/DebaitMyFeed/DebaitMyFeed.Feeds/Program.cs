@@ -1,9 +1,6 @@
-using System.ServiceModel.Syndication;
-using System.Xml;
 using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.DrDk;
 using DebaitMyFeed.Library.JvDk;
-using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,16 +10,13 @@ builder.Services.AddSwaggerGen();
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddMemoryCache();
-builder.Services.AddHttpClient();
+builder.Services.AddLogging(options => options.AddConsole());
 
 builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
 builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
 
-builder.Services.AddKeyedSingleton<IArticleTextExtractor, DrArticleTextExtractor>("DrDk");
-builder.Services.AddKeyedSingleton<IFeedDebaiter, DrDkFeedDebaiter>("DrDk");
-
-builder.Services.AddKeyedSingleton<IArticleTextExtractor, JvArticleTextExtractor>("JvDk");
-builder.Services.AddKeyedSingleton<IFeedDebaiter, JvDkFeedDebaiter>("JvDk");
+builder.Services.AddKeyedSingleton<IFeedDebaiter, DrFeedDebaiter>("DrDk");
+builder.Services.AddKeyedSingleton<IFeedDebaiter, JvFeedDebaiter>("JvDk");
 
 var app = builder.Build();
 
