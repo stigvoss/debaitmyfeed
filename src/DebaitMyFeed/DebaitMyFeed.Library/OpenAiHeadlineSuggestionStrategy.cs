@@ -31,7 +31,7 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Current date and time is {DateTimeOffset.Now:o}.
             """;
         
-        string instructions = 
+        string instructionsPrompt = 
             """
                 The user will provide you the text of the article.
                 You will use the text to generate a clear, concise, specific 
@@ -50,12 +50,15 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
             $"""
                 The article was published on {article.Published:o}.
                 The article is in {article.ArticleLanguage}.
+                The source of the article is {article.Source}.
+                The original headline of the article was: {article.Headline}.
+                You may use the original headline as inspiration, but keep the previous instructions as a priority.
             """;
         
         var messages = new List<ChatMessage>
         {
             new SystemChatMessage(dateContext),
-            new SystemChatMessage(instructions),
+            new SystemChatMessage(instructionsPrompt),
             new SystemChatMessage(articleContext),
             new UserChatMessage(article.Text)
         };
