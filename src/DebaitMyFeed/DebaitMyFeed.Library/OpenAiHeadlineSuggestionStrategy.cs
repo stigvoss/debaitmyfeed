@@ -42,6 +42,7 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Hvis nøglepersonerne i artiklen forventes at være kendt af læseren, overvej at inkludere deres navn,
                 eller hvis nøglepersoner har en titel der er betydende for artiklen, overvej at inkludere titlen.
                 Hvis det er mere sandsynligt at læseren vil genkende personens titel end navn, så overvej at bruge titlen i stedet for navnet.
+                Hvis personen bag titlen er meget kendt, f.eks. præsident af USA, så brug titlen frem for navnet.
                 Hvis artiklen indhold omhandler nogle bestemte nøglesteder, overvej at inkludere stedet i overskriften.
                 If the article mentions commonly known organizations, consider including the organization.
                 Hvis artiklen nævner alment kendte organisationer eller virksomheder, overvej at inkludere navnet i overskriften, så længe det er relevant for artiklens kerneindhold. 
