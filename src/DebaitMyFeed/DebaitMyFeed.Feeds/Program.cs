@@ -34,6 +34,7 @@ app.MapGet("/dr.dk/{feedName}",
         {
             string[] validFeedNames =
             [
+                "allenyheder",
                 "senestenyt",
                 "indland",
                 "udland",
