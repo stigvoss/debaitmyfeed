@@ -1,7 +1,7 @@
 using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.DrDk;
 using DebaitMyFeed.Library.JvDk;
-using DebaitMyFeed.Library.SoenderborgNyt;
+using DebaitMyFeed.Library.SonderborgNyt;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
