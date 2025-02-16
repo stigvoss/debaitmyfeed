@@ -1,6 +1,7 @@
 using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.DrDk;
 using DebaitMyFeed.Library.JvDk;
+using DebaitMyFeed.Library.SoenderborgNyt;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
@@ -48,6 +49,7 @@ builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggest
 
 builder.Services.AddKeyedSingleton<IFeedDebaiter, DrFeedDebaiter>("DrDk");
 builder.Services.AddKeyedSingleton<IFeedDebaiter, JvFeedDebaiter>("JvDk");
+builder.Services.AddKeyedSingleton<IFeedDebaiter, SonderborgNytDebaiter>("SonderborgNyt");
 
 var app = builder.Build();
 
@@ -164,6 +166,20 @@ app.MapGet("/jv.dk/{feedName}",
             return Results.Bytes(feed, "application/rss+xml");
         })
     .WithName("JvFeeds")
+    .WithOpenApi();
+
+app.MapGet("/sonderborgnyt.dk",
+        async (
+            [FromKeyedServices("SonderborgNyt")]IFeedDebaiter debaiter) =>
+        {
+
+            string url = "https://www.sonderborgnyt.dk/feed/";
+            
+            ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
+
+            return Results.Bytes(feed, "application/rss+xml");
+        })
+    .WithName("SonderborgNytFeeds")
     .WithOpenApi();
 
 app.Run();

@@ -24,7 +24,11 @@ public abstract class FeedDebaiter : IFeedDebaiter
     
     public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(string feedUrl)
     {
-        XmlReader reader = XmlReader.Create(feedUrl);
+        HttpClient client = new HttpClient();
+        client.DefaultRequestHeaders.Add("User-Agent", "DebaitMyFeed/1.0");
+        Stream feedXml = await client.GetStreamAsync(feedUrl);
+        
+        XmlReader reader = XmlReader.Create(feedXml);
         SyndicationFeed feed = SyndicationFeed.Load(reader);
 
         await Parallel.ForEachAsync(feed.Items, async (item, _) =>
