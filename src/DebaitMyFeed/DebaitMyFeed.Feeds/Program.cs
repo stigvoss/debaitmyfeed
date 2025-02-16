@@ -2,6 +2,10 @@ using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.DrDk;
 using DebaitMyFeed.Library.JvDk;
 using DebaitMyFeed.Library.SoenderborgNyt;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +16,33 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddLogging(options => options.AddConsole());
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeFormattedMessage = true;
+    logging.IncludeScopes = true;
+});
+
+IOpenTelemetryBuilder otlpBuilder = builder.Services
+    .AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        // Metrics provider from OpenTelemetry
+        metrics.AddAspNetCoreInstrumentation();
+        // Metrics provides by ASP.NET Core in .NET 8
+        metrics.AddMeter("Microsoft.AspNetCore.Hosting");
+        metrics.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+    })
+    .WithTracing(tracing =>
+    {
+        tracing.AddAspNetCoreInstrumentation();
+        tracing.AddHttpClientInstrumentation();
+    });
+
+var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+if (!string.IsNullOrWhiteSpace(otlpEndpoint))
+{
+    otlpBuilder.UseOtlpExporter();
+}
 
 builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
 builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
@@ -31,11 +62,12 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/dr.dk/{feedName}",
         async (
-            [FromKeyedServices("DrDk")]IFeedDebaiter debaiter,
+            [FromKeyedServices("DrDk")] IFeedDebaiter debaiter,
             string feedName) =>
         {
             string[] validFeedNames =
             [
+                "allenyheder",
                 "senestenyt",
                 "indland",
                 "udland",
@@ -49,14 +81,14 @@ app.MapGet("/dr.dk/{feedName}",
                 "vejret",
                 "regionale"
             ];
-            
+
             if (!validFeedNames.Contains(feedName))
             {
                 return Results.BadRequest("Invalid feed name");
             }
 
             string url = $"https://www.dr.dk/nyheder/service/feeds/{feedName}";
-            
+
             ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
 
             return Results.Bytes(feed, "application/rss+xml");
@@ -66,7 +98,7 @@ app.MapGet("/dr.dk/{feedName}",
 
 app.MapGet("/dr.dk/regionale/{feedName}",
         async (
-            [FromKeyedServices("DrDk")]IFeedDebaiter debaiter,
+            [FromKeyedServices("DrDk")] IFeedDebaiter debaiter,
             string feedName) =>
         {
             string[] validFeedNames =
@@ -81,14 +113,14 @@ app.MapGet("/dr.dk/regionale/{feedName}",
                 "sjaelland",
                 "oestjylland"
             ];
-            
+
             if (!validFeedNames.Contains(feedName))
             {
                 return Results.BadRequest("Invalid feed name");
             }
 
             string url = $"https://www.dr.dk/nyheder/service/feeds/regionale/{feedName}";
-            
+
             ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
 
             return Results.Bytes(feed, "application/rss+xml");
@@ -98,11 +130,11 @@ app.MapGet("/dr.dk/regionale/{feedName}",
 
 app.MapGet("/jv.dk/{feedName}",
         async (
-            [FromKeyedServices("JvDk")]IFeedDebaiter debaiter,
+            [FromKeyedServices("JvDk")] IFeedDebaiter debaiter,
             string feedName) =>
         {
             string[] validFeedNames =
-            [    
+            [
                 "forside",
                 "danmark",
                 "erhverv",
@@ -121,14 +153,14 @@ app.MapGet("/jv.dk/{feedName}",
                 "varde",
                 "vejen"
             ];
-            
+
             if (!validFeedNames.Contains(feedName))
             {
                 return Results.BadRequest("Invalid feed name");
             }
 
             string url = $"https://jv.dk/feed/{feedName}";
-            
+
             ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
 
             return Results.Bytes(feed, "application/rss+xml");

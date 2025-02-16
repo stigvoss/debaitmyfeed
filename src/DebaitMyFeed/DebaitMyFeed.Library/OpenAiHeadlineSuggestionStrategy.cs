@@ -23,71 +23,46 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
         this.openAiClient = new OpenAIClient(openAiOptions.ApiKey);
         this.chatClient = this.openAiClient.GetChatClient(openAiOptions.Model);
     }
-    
-    public async Task<string?> SuggestHeadlineAsync(string articleText)
-    {
-        string prompt = 
-            """
-                The user will provide you the text of the article.
-                You will use the text to generate a clear, concise, specific 
-                and descriptive headline free of clickbait for the article.
-                Focus on key points of the article.
-                Keep a neutral tone. 
-                If the key people in the article are expected to be known by the reader, consider including their name,
-                otherwise, if key people has a title significant to the article, consider including the title.
-                If the article mentions a location key to the article, consider including the location.
-                If the article mentions commonly known organizations, consider including the organization.
-                Keep the headline in the language of the article. 
-                You will only give the headline, nothing else.
-            """;
-        
-        var messages = new List<ChatMessage>
-        {
-            new SystemChatMessage(prompt),
-            new UserChatMessage(articleText)
-        };
-
-        ChatCompletionOptions options = new()
-        {
-            Temperature = 0.5f
-        };
-        ClientResult<ChatCompletion>? chatCompletion = await chatClient.CompleteChatAsync(messages, options);
-
-        return chatCompletion.Value.Content.FirstOrDefault()?.Text;
-    }
 
     public async Task<string?> SuggestHeadlineAsync(Article article)
     {
         string dateContext =
             $"""
-                Current date and time is {DateTimeOffset.Now:o}.
+                Nuværende dato og klokkeslæt er {DateTimeOffset.Now:o}.
             """;
         
-        string instructions = 
+        string instructionsPrompt = 
             """
-                The user will provide you the text of the article.
+                Brugeren vil give dig artiklens tekst.
                 You will use the text to generate a clear, concise, specific 
                 and descriptive headline free of clickbait for the article.
-                Focus on key points of the article.
-                Keep a neutral tone. 
-                If the key people in the article are expected to be known by the reader, consider including their name,
-                otherwise, if key people has a title significant to the article, consider including the title.
-                If the article mentions a location key to the article, consider including the location.
+                Du vil bruge teksten til at generere en klar, præcis, specifik og beskrivende overskrift til artiklen som er fri for clickbait.
+                Fokusér på nøgle pointerne i artiklen.
+                Tonen i overskriften skal være neutral.
+                Hvis nøglepersonerne i artiklen forventes at være kendt af læseren, overvej at inkludere deres navn,
+                eller hvis nøglepersoner har en titel der er betydende for artiklen, overvej at inkludere titlen.
+                Hvis det er mere sandsynligt at læseren vil genkende personens titel end navn, så overvej at bruge titlen i stedet for navnet.
+                Hvis personen bag titlen er meget kendt, f.eks. præsident af USA, så brug titlen frem for navnet.
+                Hvis artiklen indhold omhandler nogle bestemte nøglesteder, overvej at inkludere stedet i overskriften.
                 If the article mentions commonly known organizations, consider including the organization.
-                Keep the headline in the language of the article. 
-                You will only give the headline, nothing else.
+                Hvis artiklen nævner alment kendte organisationer eller virksomheder, overvej at inkludere navnet i overskriften, så længe det er relevant for artiklens kerneindhold. 
+                Brug artiklens original sprog når du laver overskriften.
+                Du vil kun give overskriften, intet andet i dit svar.
             """;
 
         string articleContext =
             $"""
-                The article was published on {article.Published:o}.
-                The article is in {article.ArticleLanguage}.
+                Aritklen var udgivet på dette tidspunkt: {article.Published:o}.
+                Artiklens sprog er: {article.ArticleLanguage}.
+                Den originale kilde til artiklen er: {article.Source}.
+                Den originale overskrift til artiklen er: {article.Headline}.
+                Du må bruge den originale overskrift som inspiration til din overskrift, men husk at holde dig til de tidligere instruktioner.
             """;
         
         var messages = new List<ChatMessage>
         {
             new SystemChatMessage(dateContext),
-            new SystemChatMessage(instructions),
+            new SystemChatMessage(instructionsPrompt),
             new SystemChatMessage(articleContext),
             new UserChatMessage(article.Text)
         };
