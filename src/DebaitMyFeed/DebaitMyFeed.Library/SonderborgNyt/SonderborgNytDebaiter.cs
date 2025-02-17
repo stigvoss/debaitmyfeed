@@ -5,11 +5,17 @@ using Microsoft.Extensions.Logging;
 namespace DebaitMyFeed.Library.SonderborgNyt;
 
 public class SonderborgNytDebaiter(
-    IHeadlineSuggestionStrategy suggestionStrategy,
     IMemoryCache cache,
     ILogger<FeedDebaiter> logger)
-    : FeedDebaiter(suggestionStrategy, cache, logger)
+    : FeedDebaiter(cache, logger)
 {
+    public override string Id => "sonderborgnyt.dk";
+    
+    public override Uri? GetFeedUrl(string? feedName)
+    {
+        return new Uri("https://sonderborgnyt.dk/feed/");
+    }
+
     protected override async Task<Article> GetArticleAsync(string headline, DateTimeOffset published, Uri uri)
     {
         HttpClient client = new HttpClient();

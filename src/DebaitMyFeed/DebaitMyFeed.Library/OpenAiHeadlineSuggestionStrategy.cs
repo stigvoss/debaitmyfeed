@@ -24,6 +24,8 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
         this.chatClient = this.openAiClient.GetChatClient(openAiOptions.Model);
     }
 
+    public string Id => "openai";
+
     public byte MaxConcurrency => 5;
 
     public async Task<string?> SuggestHeadlineAsync(Article article)

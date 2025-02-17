@@ -2,8 +2,8 @@ using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.DrDk;
 using DebaitMyFeed.Library.JvDk;
 using DebaitMyFeed.Library.SonderborgNyt;
+using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -44,15 +44,25 @@ if (!string.IsNullOrWhiteSpace(otlpEndpoint))
     otlpBuilder.UseOtlpExporter();
 }
 
-// builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
-// builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
+if (builder.Configuration.GetSection("OpenAi").Exists())
+{
+    builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
+    builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
+}
 
 builder.Services.AddOptions<MistralAiOptions>().Bind(builder.Configuration.GetSection("MistralAi"));
 builder.Services.AddSingleton<IHeadlineSuggestionStrategy, MistralAiHeadlineSuggestionStrategy>();
+if (builder.Services.All(descriptor => descriptor.ServiceType != typeof(IHeadlineSuggestionStrategy)))
+{
+    throw new InvalidOperationException("No headline suggestion strategy found");
+}
 
-builder.Services.AddKeyedSingleton<IFeedDebaiter, DrFeedDebaiter>("DrDk");
-builder.Services.AddKeyedSingleton<IFeedDebaiter, JvFeedDebaiter>("JvDk");
-builder.Services.AddKeyedSingleton<IFeedDebaiter, SonderborgNytDebaiter>("SonderborgNyt");
+builder.Services.AddSingleton<IFeedDebaiter, DrFeedDebaiter>();
+builder.Services.AddSingleton<IFeedDebaiter, JvFeedDebaiter>();
+builder.Services.AddSingleton<IFeedDebaiter, SonderborgNytDebaiter>();
+
+builder.Services.AddSingleton<SuggestionStrategyRegistry>();
+builder.Services.AddSingleton<DebaiterRegistry>();
 
 var app = builder.Build();
 
@@ -63,126 +73,34 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/dr.dk/{feedName}",
+app.MapGet("/{feedId}/{feedName}",
         async (
-            [FromKeyedServices("DrDk")] IFeedDebaiter debaiter,
-            string feedName) =>
+            [FromServices] DebaiterRegistry debaiterRegistry,
+            [FromServices] SuggestionStrategyRegistry suggestionStrategyRegistry,
+            [FromRoute] string feedId,
+            [FromRoute] string feedName,
+            [FromQuery] string? provider = null) =>
         {
-            string[] validFeedNames =
-            [
-                "allenyheder",
-                "senestenyt",
-                "indland",
-                "udland",
-                "penge",
-                "politik",
-                "sporten",
-                "senestesport",
-                "viden",
-                "kultur",
-                "musik",
-                "vejret",
-                "regionale"
-            ];
-
-            if (!validFeedNames.Contains(feedName))
+            if (string.IsNullOrWhiteSpace(provider))
             {
-                return Results.BadRequest("Invalid feed name");
+                provider = "openai";
             }
-
-            string url = $"https://www.dr.dk/nyheder/service/feeds/{feedName}";
-
-            ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
-
-            return Results.Bytes(feed, "application/rss+xml");
-        })
-    .WithName("DrFeeds")
-    .WithOpenApi();
-
-app.MapGet("/dr.dk/regionale/{feedName}",
-        async (
-            [FromKeyedServices("DrDk")] IFeedDebaiter debaiter,
-            string feedName) =>
-        {
-            string[] validFeedNames =
-            [
-                "kbh",
-                "bornholm",
-                "syd",
-                "fyn",
-                "vest",
-                "nord",
-                "trekanten",
-                "sjaelland",
-                "oestjylland"
-            ];
-
-            if (!validFeedNames.Contains(feedName))
-            {
-                return Results.BadRequest("Invalid feed name");
-            }
-
-            string url = $"https://www.dr.dk/nyheder/service/feeds/regionale/{feedName}";
-
-            ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
-
-            return Results.Bytes(feed, "application/rss+xml");
-        })
-    .WithName("DrRegionalFeeds")
-    .WithOpenApi();
-
-app.MapGet("/jv.dk/{feedName}",
-        async (
-            [FromKeyedServices("JvDk")] IFeedDebaiter debaiter,
-            string feedName) =>
-        {
-            string[] validFeedNames =
-            [
-                "forside",
-                "danmark",
-                "erhverv",
-                "sport",
-                "esbjerg-fb",
-                "soenderjyske",
-                "kolding-if",
-                "aabenraa",
-                "billund",
-                "esbjerg",
-                "responsys",
-                "haderslev",
-                "kolding",
-                "soenderborg",
-                "toender",
-                "varde",
-                "vejen"
-            ];
-
-            if (!validFeedNames.Contains(feedName))
-            {
-                return Results.BadRequest("Invalid feed name");
-            }
-
-            string url = $"https://jv.dk/feed/{feedName}";
-
-            ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
-
-            return Results.Bytes(feed, "application/rss+xml");
-        })
-    .WithName("JvFeeds")
-    .WithOpenApi();
-
-app.MapGet("/sonderborgnyt.dk",
-        async (
-            [FromKeyedServices("SonderborgNyt")]IFeedDebaiter debaiter) =>
-        {
-
-            string url = "https://www.sonderborgnyt.dk/feed/";
             
-            ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(url);
+            try
+            {
+                IHeadlineSuggestionStrategy suggestionStrategy = suggestionStrategyRegistry.GetStrategy(provider);
+                
+                IFeedDebaiter debaiter = debaiterRegistry.GetDebaiter(feedId);
+                ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(suggestionStrategy, feedName);
 
-            return Results.Bytes(feed, "application/rss+xml");
+                return Results.Bytes(feed, "application/rss+xml");
+            } 
+            catch (InvalidOperationException e)
+            {
+                return Results.BadRequest(e.Message);
+            }
         })
-    .WithName("SonderborgNytFeeds")
+    .WithName("DebaitFeed")
     .WithOpenApi();
 
 app.Run();
