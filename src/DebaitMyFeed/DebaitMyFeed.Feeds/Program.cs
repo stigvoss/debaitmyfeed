@@ -44,8 +44,11 @@ if (!string.IsNullOrWhiteSpace(otlpEndpoint))
     otlpBuilder.UseOtlpExporter();
 }
 
-builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
-builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
+// builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
+// builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
+
+builder.Services.AddOptions<MistralAiOptions>().Bind(builder.Configuration.GetSection("MistralAi"));
+builder.Services.AddSingleton<IHeadlineSuggestionStrategy, MistralAiHeadlineSuggestionStrategy>();
 
 builder.Services.AddKeyedSingleton<IFeedDebaiter, DrFeedDebaiter>("DrDk");
 builder.Services.AddKeyedSingleton<IFeedDebaiter, JvFeedDebaiter>("JvDk");

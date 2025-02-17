@@ -26,7 +26,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7094;http://localhost:5121",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MistralAi__ApiKey": "iumXS1PXk5dGrrupliRYvwr5q8LQ2s0U"
       }
     },
     "IIS Express": {

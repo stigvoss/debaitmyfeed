@@ -31,7 +31,13 @@ public abstract class FeedDebaiter : IFeedDebaiter
         XmlReader reader = XmlReader.Create(feedXml);
         SyndicationFeed feed = SyndicationFeed.Load(reader);
 
-        await Parallel.ForEachAsync(feed.Items, async (item, _) =>
+        await Parallel.ForEachAsync(
+            feed.Items, 
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = this.suggestionStrategy.MaxConcurrency
+            }, 
+            async (item, _) =>
         {
             if (cache.TryGetValue(item.Id, out string? cachedHeadline))
             {

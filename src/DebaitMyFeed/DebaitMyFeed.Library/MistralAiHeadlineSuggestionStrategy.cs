@@ -1,30 +1,27 @@
-using System.ClientModel;
 using Microsoft.Extensions.Options;
-using OpenAI;
-using OpenAI.Chat;
+using Mistral.SDK;
+using Mistral.SDK.DTOs;
 
 namespace DebaitMyFeed.Library;
 
-public class OpenAiOptions
+public class MistralAiOptions
 {
     public required string ApiKey { get; set; }
-    public string Model { get; set; } = "gpt-4o-mini";
 }
 
-public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
+public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
 {
-    private readonly OpenAIClient openAiClient;
-    private readonly ChatClient chatClient;
+    private readonly MistralClient client;
 
-    public OpenAiHeadlineSuggestionStrategy(IOptions<OpenAiOptions> options)
+    public MistralAiHeadlineSuggestionStrategy(IOptions<MistralAiOptions> options)
     {
-        OpenAiOptions openAiOptions = options.Value;
+        MistralAiOptions mistralAiOptions = options.Value;
         
-        this.openAiClient = new OpenAIClient(openAiOptions.ApiKey);
-        this.chatClient = this.openAiClient.GetChatClient(openAiOptions.Model);
+        APIAuthentication authentication = new APIAuthentication(mistralAiOptions.ApiKey);
+        this.client = new MistralClient(authentication);
     }
 
-    public byte MaxConcurrency => 5;
+    public byte MaxConcurrency => 3;
 
     public async Task<string?> SuggestHeadlineAsync(Article article)
     {
@@ -36,8 +33,6 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
         string instructionsPrompt = 
             """
                 Brugeren vil give dig artiklens tekst.
-                You will use the text to generate a clear, concise, specific 
-                and descriptive headline free of clickbait for the article.
                 Du vil bruge teksten til at generere en klar, præcis, specifik og beskrivende overskrift til artiklen som er fri for clickbait.
                 Fokusér på nøgle pointerne i artiklen.
                 Tonen i overskriften skal være neutral.
@@ -46,10 +41,9 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Hvis det er mere sandsynligt at læseren vil genkende personens titel end navn, så overvej at bruge titlen i stedet for navnet.
                 Hvis personen bag titlen er meget kendt, f.eks. præsident af USA, så brug titlen frem for navnet.
                 Hvis artiklen indhold omhandler nogle bestemte nøglesteder, overvej at inkludere stedet i overskriften.
-                If the article mentions commonly known organizations, consider including the organization.
                 Hvis artiklen nævner alment kendte organisationer eller virksomheder, overvej at inkludere navnet i overskriften, så længe det er relevant for artiklens kerneindhold. 
                 Brug artiklens original sprog når du laver overskriften.
-                Du vil kun give overskriften, intet andet i dit svar.
+                Du vil kun give overskriften, intet andet i dit svar, ingen forklaringer eller noter. Kun en enkelt linje med overskriften.
             """;
 
         string articleContext =
@@ -61,20 +55,23 @@ public class OpenAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Du må bruge den originale overskrift som inspiration til din overskrift, men husk at holde dig til de tidligere instruktioner.
             """;
         
-        var messages = new List<ChatMessage>
+        List<ChatMessage> messages =
+        [
+            new(ChatMessage.RoleEnum.System, dateContext),
+            new(ChatMessage.RoleEnum.System, instructionsPrompt),
+            new(ChatMessage.RoleEnum.System, articleContext),
+            new(ChatMessage.RoleEnum.User, article.Text)
+        ];
+        
+        ChatCompletionRequest request = new(ModelDefinitions.MistralMedium, messages)
         {
-            new SystemChatMessage(dateContext),
-            new SystemChatMessage(instructionsPrompt),
-            new SystemChatMessage(articleContext),
-            new UserChatMessage(article.Text)
+            Temperature = 0.5m
         };
 
-        ChatCompletionOptions options = new()
-        {
-            Temperature = 0.5f
-        };
-        ClientResult<ChatCompletion>? chatCompletion = await chatClient.CompleteChatAsync(messages, options);
+        ChatCompletionResponse? response = await client.Completions.GetCompletionAsync(request);
 
-        return chatCompletion.Value.Content.FirstOrDefault()?.Text;
+        await Task.Delay(500);
+
+        return response.Choices.FirstOrDefault()?.Message.Content.Split("\n").FirstOrDefault();
     }
 }
