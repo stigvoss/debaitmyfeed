@@ -21,6 +21,8 @@ public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
         this.client = new MistralClient(authentication);
     }
 
+    public string Id => "mistralai";
+    
     public byte MaxConcurrency => 3;
 
     public async Task<string?> SuggestHeadlineAsync(Article article)

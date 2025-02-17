@@ -45,7 +45,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
             feed.Items, 
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = this.suggestionStrategy.MaxConcurrency
+                MaxDegreeOfParallelism = suggestionStrategy.MaxConcurrency
             }, 
             async (item, _) =>
         {
