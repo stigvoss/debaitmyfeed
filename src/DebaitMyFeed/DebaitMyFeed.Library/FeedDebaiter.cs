@@ -41,9 +41,17 @@ public abstract class FeedDebaiter : IFeedDebaiter
         XmlReader reader = XmlReader.Create(feedXml);
         SyndicationFeed feed = SyndicationFeed.Load(reader);
 
-        await Parallel.ForEachAsync(feed.Items, async (item, _) =>
+        await Parallel.ForEachAsync(
+            feed.Items, 
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = suggestionStrategy.MaxConcurrency
+            }, 
+            async (item, _) =>
         {
-            if (cache.TryGetValue(item.Id, out string? cachedHeadline))
+            string cacheKey = $"{suggestionStrategy.Id}:{item.Id}";
+            
+            if (cache.TryGetValue(cacheKey, out string? cachedHeadline))
             {
                 item.Title = new TextSyndicationContent(cachedHeadline);
             }
@@ -66,7 +74,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
                         headline = $"\ud83d\udcb6 {headline}";
                     }
 
-                    cache.Set(item.Id, headline, TimeSpan.FromDays(7));
+                    cache.Set(cacheKey, headline, TimeSpan.FromDays(7));
 
                     item.Title = new TextSyndicationContent(headline);
                 } 

@@ -50,6 +50,12 @@ if (builder.Configuration.GetSection("OpenAi").Exists())
     builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
 }
 
+if (builder.Configuration.GetSection("MistralAi").Exists())
+{
+    builder.Services.AddOptions<MistralAiOptions>().Bind(builder.Configuration.GetSection("MistralAi"));
+    builder.Services.AddSingleton<IHeadlineSuggestionStrategy, MistralAiHeadlineSuggestionStrategy>();
+}
+
 if (builder.Services.All(descriptor => descriptor.ServiceType != typeof(IHeadlineSuggestionStrategy)))
 {
     throw new InvalidOperationException("No headline suggestion strategy found");
