@@ -56,6 +56,12 @@ if (builder.Configuration.GetSection("MistralAi").Exists())
     builder.Services.AddSingleton<IHeadlineSuggestionStrategy, MistralAiHeadlineSuggestionStrategy>();
 }
 
+if (builder.Configuration.GetSection("Ollama").Exists())
+{
+    builder.Services.AddOptions<OllamaOptions>().Bind(builder.Configuration.GetSection("Ollama"));
+    builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OllamaHeadlineSuggestionStrategy>();
+}
+
 if (builder.Services.All(descriptor => descriptor.ServiceType != typeof(IHeadlineSuggestionStrategy)))
 {
     throw new InvalidOperationException("No headline suggestion strategy found");
