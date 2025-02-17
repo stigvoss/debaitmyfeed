@@ -49,7 +49,9 @@ public abstract class FeedDebaiter : IFeedDebaiter
             }, 
             async (item, _) =>
         {
-            if (cache.TryGetValue(item.Id, out string? cachedHeadline))
+            string cacheKey = $"{suggestionStrategy.Id}:{item.Id}";
+            
+            if (cache.TryGetValue(cacheKey, out string? cachedHeadline))
             {
                 item.Title = new TextSyndicationContent(cachedHeadline);
             }
@@ -72,7 +74,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
                         headline = $"\ud83d\udcb6 {headline}";
                     }
 
-                    cache.Set(item.Id, headline, TimeSpan.FromDays(7));
+                    cache.Set(cacheKey, headline, TimeSpan.FromDays(7));
 
                     item.Title = new TextSyndicationContent(headline);
                 } 
