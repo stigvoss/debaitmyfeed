@@ -8,25 +8,35 @@ namespace DebaitMyFeed.Library;
 
 public abstract class FeedDebaiter : IFeedDebaiter
 {
-    private readonly IHeadlineSuggestionStrategy suggestionStrategy;
     private readonly IMemoryCache cache;
     private readonly ILogger<FeedDebaiter> logger;
 
     public FeedDebaiter(
-        IHeadlineSuggestionStrategy suggestionStrategy,
         IMemoryCache cache,
         ILogger<FeedDebaiter> logger)
     {
-        this.suggestionStrategy = suggestionStrategy;
         this.cache = cache;
         this.logger = logger;
     }
+
+    public abstract string Id { get; }
     
-    public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(string feedUrl)
+    public abstract Uri? GetFeedUrl(string? feedName);
+
+    public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(
+        IHeadlineSuggestionStrategy suggestionStrategy, 
+        string? feedName = null)
     {
+        Uri? feedUri = GetFeedUrl(feedName);
+        
+        if (feedUri is null)
+        {
+            throw new InvalidOperationException("Invalid feed name");
+        }
+        
         HttpClient client = new HttpClient();
         client.DefaultRequestHeaders.Add("User-Agent", "DebaitMyFeed/1.0");
-        Stream feedXml = await client.GetStreamAsync(feedUrl);
+        Stream feedXml = await client.GetStreamAsync(feedUri);
         
         XmlReader reader = XmlReader.Create(feedXml);
         SyndicationFeed feed = SyndicationFeed.Load(reader);

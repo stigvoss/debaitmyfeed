@@ -2,5 +2,9 @@ namespace DebaitMyFeed.Library;
 
 public interface IFeedDebaiter
 {
-    public Task<ReadOnlyMemory<byte>> DebaitFeedAsync(string feedUrl);
+    public string Id { get; }
+    
+    public Task<ReadOnlyMemory<byte>> DebaitFeedAsync(
+        IHeadlineSuggestionStrategy suggestionStrategy, 
+        string? feedName = null);
 }

@@ -6,11 +6,55 @@ using Microsoft.Extensions.Logging;
 namespace DebaitMyFeed.Library.DrDk;
 
 public class DrFeedDebaiter(
-    IHeadlineSuggestionStrategy suggestionStrategy, 
     IMemoryCache cache,
     ILogger<DrFeedDebaiter> logger)
-    : FeedDebaiter(suggestionStrategy, cache, logger)
+    : FeedDebaiter(cache, logger)
 {
+    public override string Id => "dr.dk";
+    
+    /// <summary>
+    /// Valid feed names for DR.dk, with a boolean indicating whether the feed is regional.
+    /// </summary>
+    private readonly Dictionary<string, bool> validFeedNames = new()
+    {
+        { "allenyheder", false },
+        { "senestenyt", false },
+        { "indland", false },
+        { "udland", false },
+        { "penge", false },
+        { "politik", false },
+        { "sporten", false },
+        { "senestesport", false },
+        { "viden", false },
+        { "kultur", false },
+        { "musik", false },
+        { "vejret", false },
+        { "kbh", true },
+        { "bornholm", true },
+        { "syd", true },
+        { "fyn", true },
+        { "vest", true },
+        { "nord", true },
+        { "trekanten", true },
+        { "sjaelland", true },
+        { "oestjylland", true }
+    };
+    
+    public override Uri? GetFeedUrl(string? feedName)
+    {
+        if (string.IsNullOrWhiteSpace(feedName) || !this.validFeedNames.TryGetValue(feedName, out var isRegional))
+        {
+            return null;
+        }
+        
+        if (isRegional)
+        {
+            return new Uri($"https://www.dr.dk/nyheder/service/feeds/regionale/{feedName}");
+        }
+        
+        return new Uri($"https://www.dr.dk/nyheder/service/feeds/{feedName}");
+    }
+
     protected override async Task<Article> GetArticleAsync(string headline, DateTimeOffset published, Uri uri)
     {
         HttpClient client = new HttpClient();

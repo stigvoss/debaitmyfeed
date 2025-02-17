@@ -6,11 +6,43 @@ using Microsoft.Extensions.Logging;
 namespace DebaitMyFeed.Library.JvDk;
 
 public class JvFeedDebaiter(
-    IHeadlineSuggestionStrategy suggestionStrategy, 
     IMemoryCache cache,
     ILogger<JvFeedDebaiter> logger)
-    : FeedDebaiter(suggestionStrategy, cache, logger)
+    : FeedDebaiter(cache, logger)
 {
+    public override string Id => "jv.dk";
+    
+    private readonly string[] validFeedNames =
+    [
+        "forside",
+        "danmark",
+        "erhverv",
+        "sport",
+        "esbjerg-fb",
+        "soenderjyske",
+        "kolding-if",
+        "aabenraa",
+        "billund",
+        "esbjerg",
+        "responsys",
+        "haderslev",
+        "kolding",
+        "soenderborg",
+        "toender",
+        "varde",
+        "vejen"
+    ];
+    
+    public override Uri? GetFeedUrl(string? feedName)
+    {
+        if (string.IsNullOrWhiteSpace(feedName) || !validFeedNames.Contains(feedName))
+        {
+            return null;
+        }
+        
+        return new Uri($"https://jv.dk/feed/{feedName}");
+    }
+
     protected override async Task<Article> GetArticleAsync(string headline, DateTimeOffset published, Uri uri)
     {
         HttpClient client = new HttpClient();
