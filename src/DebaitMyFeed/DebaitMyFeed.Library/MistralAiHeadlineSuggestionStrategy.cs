@@ -72,6 +72,6 @@ public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
 
         await Task.Delay(500);
 
-        return response.Choices.FirstOrDefault()?.Message.Content.Split("\n").FirstOrDefault();
+        return $"\ud83c\uddea\ud83c\uddfa {response.Choices.FirstOrDefault()?.Message.Content.Split("\n").FirstOrDefault()}";
     }
 }
