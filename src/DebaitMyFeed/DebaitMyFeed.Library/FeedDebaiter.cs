@@ -20,8 +20,8 @@ public abstract class FeedDebaiter : IFeedDebaiter
     }
 
     public abstract string Id { get; }
-    
-    public abstract Uri? GetFeedUrl(string? feedName);
+
+    protected abstract Uri? GetFeedUrl(string? feedName);
 
     public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(
         IHeadlineSuggestionStrategy suggestionStrategy, 
@@ -66,12 +66,12 @@ public abstract class FeedDebaiter : IFeedDebaiter
                 {
                     Article article = await GetArticleAsync(item.Title.Text, item.PublishDate, uri);
 
-                    string? headline = await suggestionStrategy.SuggestHeadlineAsync(article);
+                    string? headline = (await suggestionStrategy.SuggestHeadlineAsync(article))?.TrimEnd('.');
 
                     // Indicate that the article requires a subscription in the headline.
                     if (article.RequiresSubscription)
                     {
-                        headline = $"\ud83d\udcb6 {headline}";
+                        headline = $"\ud83d\udd12 {headline}";
                     }
 
                     cache.Set(cacheKey, headline, TimeSpan.FromDays(7));
