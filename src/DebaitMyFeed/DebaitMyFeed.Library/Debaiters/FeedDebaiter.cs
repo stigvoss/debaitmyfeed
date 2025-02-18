@@ -73,13 +73,13 @@ public abstract class FeedDebaiter : IFeedDebaiter
                         {
                             headline = $"\ud83d\udd12 {headline}";
                         }
+                    
+                        this.logger.LogDebug("Debaited article {ArticleId} with headline {Headline} using {StrategyId}", item.Id, headline, strategy.Id);
 
                         return headline;
                     }, token: token);
             
                 item.Title = new TextSyndicationContent(headline);
-                    
-                this.logger.LogDebug("Debaited article {ArticleId} with headline {Headline}", item.Id, headline);
             } 
             catch (Exception ex)
             {
