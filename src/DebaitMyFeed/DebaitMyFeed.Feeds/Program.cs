@@ -20,7 +20,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddMemoryCache();
 builder.Services.AddLogging(options => options.AddConsole());
 builder.Logging.AddOpenTelemetry(logging =>
 {
@@ -68,6 +67,7 @@ if (builder.Configuration.GetSection("Ollama").Exists())
     builder.Services.AddSingleton<IHeadlineStrategy, OllamaHeadlineStrategy>();
 }
 
+builder.Services.AddMemoryCache();
 IFusionCacheBuilder fusionCacheBuilder = builder.Services
     .AddFusionCache()
     .WithRegisteredMemoryCache()
