@@ -3,6 +3,7 @@ using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.Debaiters;
 using DebaitMyFeed.Library.HeadlineStrategies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,9 @@ builder.AddFusionCache();
 builder.AddHeadlineStrategies();
 builder.AddDebaiters();
 
+builder.Services.AddOptions<ApiOptions>()
+    .Bind(builder.Configuration.GetSection("Api"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -31,13 +35,14 @@ app.MapGet("/{feedId}/{feedName}",
         async (
             [FromServices] DebaiterRegistry debaiterRegistry,
             [FromServices] HeadlineStrategyRegistry suggestionStrategyRegistry,
+            [FromServices] IOptions<ApiOptions> options,
             [FromRoute] string feedId,
             [FromRoute] string feedName,
             [FromQuery] string? provider = null) =>
         {
             if (string.IsNullOrWhiteSpace(provider))
             {
-                provider = "openai";
+                provider = options.Value.DefaultStrategy;
             }
             
             try
