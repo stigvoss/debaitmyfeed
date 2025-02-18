@@ -1,35 +1,27 @@
+using System.ClientModel;
 using Microsoft.Extensions.Options;
-using OllamaSharp;
-using OllamaSharp.Models;
-using OllamaSharp.Models.Chat;
+using OpenAI;
+using OpenAI.Chat;
 
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.HeadlineStrategies.OpenAi;
 
-public class OllamaOptions
+public class OpenAiHeadlineStrategy : IHeadlineStrategy
 {
-    public required Uri Endpoint { get; set; }
-    
-    public required string Model { get; set; } = "llama3.2";
-}
+    private readonly OpenAIClient openAiClient;
+    private readonly ChatClient chatClient;
 
-public class OllamaHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
-{
-    private readonly OllamaApiClient client;
-
-    public OllamaHeadlineSuggestionStrategy(IOptions<OllamaOptions> options)
+    public OpenAiHeadlineStrategy(IOptions<OpenAiOptions> options)
     {
-        OllamaOptions ollamaOptions = options.Value;
+        OpenAiOptions openAiOptions = options.Value;
         
-        this.client = new OllamaApiClient(ollamaOptions.Endpoint)
-        {
-            SelectedModel = ollamaOptions.Model
-        };
+        this.openAiClient = new OpenAIClient(openAiOptions.ApiKey);
+        this.chatClient = this.openAiClient.GetChatClient(openAiOptions.Model);
     }
-    
-    public string Id => "ollama";
-    
-    public byte MaxConcurrency => 2;
-    
+
+    public string Id => "openai";
+
+    public byte MaxConcurrency => 5;
+
     public async Task<string?> SuggestHeadlineAsync(Article article)
     {
         string dateContext =
@@ -50,7 +42,7 @@ public class OllamaHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Hvis artiklen indhold omhandler nogle bestemte nøglesteder, overvej at inkludere stedet i overskriften.
                 Hvis artiklen nævner alment kendte organisationer eller virksomheder, overvej at inkludere navnet i overskriften, så længe det er relevant for artiklens kerneindhold. 
                 Brug artiklens original sprog når du laver overskriften.
-                Du vil kun give overskriften, intet andet i dit svar, ingen forklaringer eller noter. Kun en enkelt linje med overskriften.
+                Du vil kun give overskriften, intet andet i dit svar.
             """;
 
         string articleContext =
@@ -61,19 +53,21 @@ public class OllamaHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Den originale overskrift til artiklen er: {article.Headline}.
                 Du må bruge den originale overskrift som inspiration til din overskrift, men husk at holde dig til de tidligere instruktioner.
             """;
-
-        ChatRequest request = new()
+        
+        var messages = new List<ChatMessage>
         {
-            Messages =
-            [
-                new Message(ChatRole.System, dateContext),
-                new Message(ChatRole.System, instructionsPrompt),
-                new Message(ChatRole.System, articleContext),
-                new Message(ChatRole.User, article.Text ?? string.Empty)
-            ]
+            new SystemChatMessage(dateContext),
+            new SystemChatMessage(instructionsPrompt),
+            new SystemChatMessage(articleContext),
+            new UserChatMessage(article.Text)
         };
-        ChatDoneResponseStream? response = await this.client.ChatAsync(request).StreamToEndAsync();
 
-        return response?.Message.Content;
+        ChatCompletionOptions options = new()
+        {
+            Temperature = 0.5f
+        };
+        ClientResult<ChatCompletion>? chatCompletion = await chatClient.CompleteChatAsync(messages, options);
+
+        return chatCompletion.Value.Content.FirstOrDefault()?.Text;
     }
 }

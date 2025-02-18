@@ -24,7 +24,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
     protected abstract Uri? GetFeedUrl(string? feedName);
 
     public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(
-        IHeadlineSuggestionStrategy suggestionStrategy, 
+        IHeadlineStrategy strategy, 
         string? feedName = null)
     {
         Uri? feedUri = GetFeedUrl(feedName);
@@ -45,11 +45,11 @@ public abstract class FeedDebaiter : IFeedDebaiter
             feed.Items, 
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = suggestionStrategy.MaxConcurrency
+                MaxDegreeOfParallelism = strategy.MaxConcurrency
             }, 
             async (item, _) =>
         {
-            string cacheKey = $"{suggestionStrategy.Id}:{item.Id}";
+            string cacheKey = $"{strategy.Id}:{item.Id}";
             
             if (cache.TryGetValue(cacheKey, out string? cachedHeadline))
             {
@@ -66,7 +66,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
                 {
                     Article article = await GetArticleAsync(item.Title.Text, item.PublishDate, uri);
 
-                    string? headline = (await suggestionStrategy.SuggestHeadlineAsync(article))?.TrimEnd('.');
+                    string? headline = (await strategy.SuggestHeadlineAsync(article))?.TrimEnd('.');
 
                     // Indicate that the article requires a subscription in the headline.
                     if (article.RequiresSubscription)

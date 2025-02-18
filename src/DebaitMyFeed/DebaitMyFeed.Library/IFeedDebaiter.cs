@@ -5,6 +5,6 @@ public interface IFeedDebaiter
     public string Id { get; }
     
     public Task<ReadOnlyMemory<byte>> DebaitFeedAsync(
-        IHeadlineSuggestionStrategy suggestionStrategy, 
+        IHeadlineStrategy strategy, 
         string? feedName = null);
 }

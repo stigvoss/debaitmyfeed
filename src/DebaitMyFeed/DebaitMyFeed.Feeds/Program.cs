@@ -2,6 +2,10 @@ using DebaitMyFeed.Library;
 using DebaitMyFeed.Library.Debaiters.Dr;
 using DebaitMyFeed.Library.Debaiters.Jv;
 using DebaitMyFeed.Library.Debaiters.SonderborgNyt;
+using DebaitMyFeed.Library.HeadlineStrategies;
+using DebaitMyFeed.Library.HeadlineStrategies.MistralAi;
+using DebaitMyFeed.Library.HeadlineStrategies.Ollama;
+using DebaitMyFeed.Library.HeadlineStrategies.OpenAi;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -47,22 +51,22 @@ if (!string.IsNullOrWhiteSpace(otlpEndpoint))
 if (builder.Configuration.GetSection("OpenAi").Exists())
 {
     builder.Services.AddOptions<OpenAiOptions>().Bind(builder.Configuration.GetSection("OpenAi"));
-    builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OpenAiHeadlineSuggestionStrategy>();
+    builder.Services.AddSingleton<IHeadlineStrategy, OpenAiHeadlineStrategy>();
 }
 
 if (builder.Configuration.GetSection("MistralAi").Exists())
 {
     builder.Services.AddOptions<MistralAiOptions>().Bind(builder.Configuration.GetSection("MistralAi"));
-    builder.Services.AddSingleton<IHeadlineSuggestionStrategy, MistralAiHeadlineSuggestionStrategy>();
+    builder.Services.AddSingleton<IHeadlineStrategy, MistralAiHeadlineStrategy>();
 }
 
 if (builder.Configuration.GetSection("Ollama").Exists())
 {
     builder.Services.AddOptions<OllamaOptions>().Bind(builder.Configuration.GetSection("Ollama"));
-    builder.Services.AddSingleton<IHeadlineSuggestionStrategy, OllamaHeadlineSuggestionStrategy>();
+    builder.Services.AddSingleton<IHeadlineStrategy, OllamaHeadlineStrategy>();
 }
 
-if (builder.Services.All(descriptor => descriptor.ServiceType != typeof(IHeadlineSuggestionStrategy)))
+if (builder.Services.All(descriptor => descriptor.ServiceType != typeof(IHeadlineStrategy)))
 {
     throw new InvalidOperationException("No headline suggestion strategy found");
 }
@@ -98,10 +102,10 @@ app.MapGet("/{feedId}/{feedName}",
             
             try
             {
-                IHeadlineSuggestionStrategy suggestionStrategy = suggestionStrategyRegistry.GetStrategy(provider);
+                IHeadlineStrategy strategy = suggestionStrategyRegistry.GetStrategy(provider);
                 
                 IFeedDebaiter debaiter = debaiterRegistry.GetDebaiter(feedId);
-                ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(suggestionStrategy, feedName);
+                ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(strategy, feedName);
 
                 return Results.Bytes(feed, "application/rss+xml");
             } 

@@ -1,6 +1,6 @@
 namespace DebaitMyFeed.Library;
 
-public interface IHeadlineSuggestionStrategy
+public interface IHeadlineStrategy
 {
     public string Id { get; }
     

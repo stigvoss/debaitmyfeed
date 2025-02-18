@@ -5,22 +5,22 @@ namespace DebaitMyFeed.Library;
 
 public class SuggestionStrategyRegistry
 {
-    private readonly ImmutableDictionary<string, IHeadlineSuggestionStrategy> strategies;
+    private readonly ImmutableDictionary<string, IHeadlineStrategy> strategies;
 
     public SuggestionStrategyRegistry(IServiceProvider serviceProvider)
     {
-        this.strategies = serviceProvider.GetServices<IHeadlineSuggestionStrategy>()
+        this.strategies = serviceProvider.GetServices<IHeadlineStrategy>()
             .ToImmutableDictionary(strategy => strategy.Id, strategy => strategy);
     }
     
-    public IHeadlineSuggestionStrategy GetStrategy(string id)
+    public IHeadlineStrategy GetStrategy(string id)
     {
         if (this.strategies.Count == 0)
         {
             throw new InvalidOperationException("No strategies found");
         }
         
-        if (!this.strategies.TryGetValue(id, out IHeadlineSuggestionStrategy? strategy))
+        if (!this.strategies.TryGetValue(id, out IHeadlineStrategy? strategy))
         {
             throw new InvalidOperationException($"No strategy found with id '{id}'");
         }
