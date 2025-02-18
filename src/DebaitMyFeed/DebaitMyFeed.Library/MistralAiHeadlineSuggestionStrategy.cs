@@ -70,7 +70,7 @@ public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
             new(ChatMessage.RoleEnum.User, article.Text)
         ];
         
-        ChatCompletionRequest request = new(ModelDefinitions.MistralLarge, messages)
+        ChatCompletionRequest request = new(this.model, messages)
         {
             Temperature = 0.5m
         };
