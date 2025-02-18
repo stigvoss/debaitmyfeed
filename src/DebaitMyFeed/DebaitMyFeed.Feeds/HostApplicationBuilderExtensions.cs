@@ -80,6 +80,8 @@ internal static class HostApplicationBuilderExtensions
             throw new InvalidOperationException("No headline suggestion strategy found");
         }
 
+        builder.Services.AddOptions<HeadlineStrategyRegistryOptions>()
+            .Bind(builder.Configuration.GetSection("Strategy"));
         builder.Services.AddSingleton<HeadlineStrategyRegistry>();
 
         return builder;

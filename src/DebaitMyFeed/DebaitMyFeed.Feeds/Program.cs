@@ -19,9 +19,6 @@ builder.AddFusionCache();
 builder.AddHeadlineStrategies();
 builder.AddDebaiters();
 
-builder.Services.AddOptions<ApiOptions>()
-    .Bind(builder.Configuration.GetSection("Api"));
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,14 +32,14 @@ app.MapGet("/{feedId}/{feedName}",
         async (
             [FromServices] DebaiterRegistry debaiterRegistry,
             [FromServices] HeadlineStrategyRegistry strategyRegistry,
-            [FromServices] IOptions<ApiOptions> options,
+            [FromServices] IOptions<HeadlineStrategyRegistryOptions> options,
             [FromRoute] string feedId,
             [FromRoute] string feedName,
             [FromQuery] string? provider = null) =>
         {
             if (string.IsNullOrWhiteSpace(provider))
             {
-                provider = options.Value.DefaultStrategy;
+                provider = options.Value.Default;
             }
             
             try
