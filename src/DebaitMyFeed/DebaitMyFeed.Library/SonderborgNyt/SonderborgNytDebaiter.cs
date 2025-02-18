@@ -10,8 +10,8 @@ public class SonderborgNytDebaiter(
     : FeedDebaiter(cache, logger)
 {
     public override string Id => "sonderborgnyt.dk";
-    
-    public override Uri? GetFeedUrl(string? feedName)
+
+    protected override Uri? GetFeedUrl(string? feedName)
     {
         return new Uri("https://sonderborgnyt.dk/feed/");
     }

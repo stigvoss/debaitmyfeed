@@ -39,8 +39,8 @@ public class DrFeedDebaiter(
         { "sjaelland", true },
         { "oestjylland", true }
     };
-    
-    public override Uri? GetFeedUrl(string? feedName)
+
+    protected override Uri? GetFeedUrl(string? feedName)
     {
         if (string.IsNullOrWhiteSpace(feedName) || !this.validFeedNames.TryGetValue(feedName, out var isRegional))
         {

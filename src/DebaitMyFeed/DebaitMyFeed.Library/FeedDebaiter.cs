@@ -20,8 +20,8 @@ public abstract class FeedDebaiter : IFeedDebaiter
     }
 
     public abstract string Id { get; }
-    
-    public abstract Uri? GetFeedUrl(string? feedName);
+
+    protected abstract Uri? GetFeedUrl(string? feedName);
 
     public async Task<ReadOnlyMemory<byte>> DebaitFeedAsync(
         IHeadlineSuggestionStrategy suggestionStrategy, 

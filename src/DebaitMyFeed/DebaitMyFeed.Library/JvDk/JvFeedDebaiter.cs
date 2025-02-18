@@ -32,8 +32,8 @@ public class JvFeedDebaiter(
         "varde",
         "vejen"
     ];
-    
-    public override Uri? GetFeedUrl(string? feedName)
+
+    protected override Uri? GetFeedUrl(string? feedName)
     {
         if (string.IsNullOrWhiteSpace(feedName) || !validFeedNames.Contains(feedName))
         {
