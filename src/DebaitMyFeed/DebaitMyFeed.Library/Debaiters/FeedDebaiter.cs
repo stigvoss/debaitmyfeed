@@ -4,7 +4,7 @@ using System.Xml;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.Debaiters;
 
 public abstract class FeedDebaiter : IFeedDebaiter
 {

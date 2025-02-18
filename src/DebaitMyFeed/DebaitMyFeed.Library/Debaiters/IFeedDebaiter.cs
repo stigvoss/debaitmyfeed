@@ -1,4 +1,4 @@
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.Debaiters;
 
 public interface IFeedDebaiter
 {
