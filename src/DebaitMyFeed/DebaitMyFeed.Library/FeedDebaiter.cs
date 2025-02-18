@@ -77,6 +77,8 @@ public abstract class FeedDebaiter : IFeedDebaiter
                     cache.Set(cacheKey, headline, TimeSpan.FromDays(7));
 
                     item.Title = new TextSyndicationContent(headline);
+                    
+                    this.logger.LogDebug("Debaited article {ArticleId} with headline {Headline}", item.Id, headline);
                 } 
                 catch (Exception ex)
                 {
