@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DebaitMyFeed.Library;
 
-public class SuggestionStrategyRegistry
+public class HeadlineStrategyRegistry
 {
     private readonly ImmutableDictionary<string, IHeadlineStrategy> strategies;
 
-    public SuggestionStrategyRegistry(IServiceProvider serviceProvider)
+    public HeadlineStrategyRegistry(IServiceProvider serviceProvider)
     {
         this.strategies = serviceProvider.GetServices<IHeadlineStrategy>()
             .ToImmutableDictionary(strategy => strategy.Id, strategy => strategy);
