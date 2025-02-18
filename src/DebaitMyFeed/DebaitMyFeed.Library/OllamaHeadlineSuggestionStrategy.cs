@@ -1,35 +1,35 @@
 using Microsoft.Extensions.Options;
-using Mistral.SDK;
-using Mistral.SDK.DTOs;
+using OllamaSharp;
+using OllamaSharp.Models;
+using OllamaSharp.Models.Chat;
 
 namespace DebaitMyFeed.Library;
 
-public class MistralAiOptions
+public class OllamaOptions
 {
-    public required string ApiKey { get; set; }
+    public required Uri Endpoint { get; set; }
     
-    public string Model { get; set; } = ModelDefinitions.MistralLarge;
+    public required string Model { get; set; } = "deepseek-r1:1.5b";
 }
 
-public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
+public class OllamaHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
 {
-    private readonly MistralClient client;
-    private readonly string model;
+    private readonly OllamaApiClient client;
 
-    public MistralAiHeadlineSuggestionStrategy(IOptions<MistralAiOptions> options)
+    public OllamaHeadlineSuggestionStrategy(IOptions<OllamaOptions> options)
     {
-        MistralAiOptions mistralAiOptions = options.Value;
+        OllamaOptions ollamaOptions = options.Value;
         
-        this.model = mistralAiOptions.Model;
-        
-        APIAuthentication authentication = new APIAuthentication(mistralAiOptions.ApiKey);
-        this.client = new MistralClient(authentication);
+        this.client = new OllamaApiClient(ollamaOptions.Endpoint)
+        {
+            SelectedModel = ollamaOptions.Model
+        };
     }
-
-    public string Id => "mistralai";
     
-    public byte MaxConcurrency => 3;
-
+    public string Id => "ollama";
+    
+    public byte MaxConcurrency => 2;
+    
     public async Task<string?> SuggestHeadlineAsync(Article article)
     {
         string dateContext =
@@ -61,24 +61,19 @@ public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
                 Den originale overskrift til artiklen er: {article.Headline}.
                 Du må bruge den originale overskrift som inspiration til din overskrift, men husk at holde dig til de tidligere instruktioner.
             """;
-        
-        List<ChatMessage> messages =
-        [
-            new(ChatMessage.RoleEnum.System, dateContext),
-            new(ChatMessage.RoleEnum.System, instructionsPrompt),
-            new(ChatMessage.RoleEnum.System, articleContext),
-            new(ChatMessage.RoleEnum.User, article.Text)
-        ];
-        
-        ChatCompletionRequest request = new(this.model, messages)
+
+        ChatRequest request = new()
         {
-            Temperature = 0.5m
+            Messages =
+            [
+                new Message(ChatRole.System, dateContext),
+                new Message(ChatRole.System, instructionsPrompt),
+                new Message(ChatRole.System, articleContext),
+                new Message(ChatRole.User, article.Text ?? string.Empty)
+            ]
         };
+        ChatDoneResponseStream? response = await this.client.ChatAsync(request).StreamToEndAsync();
 
-        ChatCompletionResponse? response = await client.Completions.GetCompletionAsync(request);
-
-        await Task.Delay(500);
-
-        return $"\ud83c\uddea\ud83c\uddfa {response.Choices.FirstOrDefault()?.Message.Content.Split("\n").FirstOrDefault()}";
+        return response?.Message.Content;
     }
 }
