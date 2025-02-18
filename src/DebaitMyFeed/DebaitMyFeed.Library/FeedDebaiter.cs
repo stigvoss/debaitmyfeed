@@ -71,7 +71,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
                     // Indicate that the article requires a subscription in the headline.
                     if (article.RequiresSubscription)
                     {
-                        headline = $"\ud83d\udcb6 {headline}";
+                        headline = $"\ud83d\udd12 {headline}";
                     }
 
                     cache.Set(cacheKey, headline, TimeSpan.FromDays(7));
