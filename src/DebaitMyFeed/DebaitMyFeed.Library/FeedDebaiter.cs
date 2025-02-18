@@ -66,7 +66,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
                 {
                     Article article = await GetArticleAsync(item.Title.Text, item.PublishDate, uri);
 
-                    string? headline = await suggestionStrategy.SuggestHeadlineAsync(article);
+                    string? headline = (await suggestionStrategy.SuggestHeadlineAsync(article))?.TrimEnd('.');
 
                     // Indicate that the article requires a subscription in the headline.
                     if (article.RequiresSubscription)
