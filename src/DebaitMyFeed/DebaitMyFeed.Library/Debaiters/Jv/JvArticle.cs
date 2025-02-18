@@ -1,4 +1,4 @@
-namespace DebaitMyFeed.Library.JvDk;
+namespace DebaitMyFeed.Library.Debaiters.Jv;
 
 public class JvArticle(string headline, DateTimeOffset published, string text, bool requiresSubscription)
     : Article(headline, published, text, requiresSubscription)

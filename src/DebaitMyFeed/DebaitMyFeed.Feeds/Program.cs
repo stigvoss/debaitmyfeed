@@ -1,7 +1,7 @@
 using DebaitMyFeed.Library;
-using DebaitMyFeed.Library.DrDk;
-using DebaitMyFeed.Library.JvDk;
-using DebaitMyFeed.Library.SonderborgNyt;
+using DebaitMyFeed.Library.Debaiters.Dr;
+using DebaitMyFeed.Library.Debaiters.Jv;
+using DebaitMyFeed.Library.Debaiters.SonderborgNyt;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;

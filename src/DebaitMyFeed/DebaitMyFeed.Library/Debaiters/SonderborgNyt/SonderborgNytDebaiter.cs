@@ -2,7 +2,8 @@ using AngleSharp;
 using AngleSharp.Dom;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-namespace DebaitMyFeed.Library.SonderborgNyt;
+
+namespace DebaitMyFeed.Library.Debaiters.SonderborgNyt;
 
 public class SonderborgNytDebaiter(
     IMemoryCache cache,

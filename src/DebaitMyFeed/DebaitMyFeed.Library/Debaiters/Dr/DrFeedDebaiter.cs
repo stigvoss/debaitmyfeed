@@ -3,7 +3,7 @@ using AngleSharp.Dom;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace DebaitMyFeed.Library.DrDk;
+namespace DebaitMyFeed.Library.Debaiters.Dr;
 
 public class DrFeedDebaiter(
     IMemoryCache cache,

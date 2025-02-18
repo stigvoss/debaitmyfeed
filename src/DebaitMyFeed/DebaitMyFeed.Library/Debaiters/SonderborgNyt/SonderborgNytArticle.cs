@@ -1,4 +1,4 @@
-namespace DebaitMyFeed.Library.SonderborgNyt;
+namespace DebaitMyFeed.Library.Debaiters.SonderborgNyt;
 
 public class SonderborgNytArticle(string headline, DateTimeOffset published, string? text)
     : Article(headline, published, text, false)
