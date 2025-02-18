@@ -1,4 +1,4 @@
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.HeadlineStrategies;
 
 public interface IHeadlineStrategy
 {
@@ -6,5 +6,5 @@ public interface IHeadlineStrategy
     
     public byte MaxConcurrency { get; }
     
-    public Task<string?> SuggestHeadlineAsync(Article article);
+    public Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken);
 }

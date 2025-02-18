@@ -22,7 +22,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
 
     public byte MaxConcurrency => 5;
 
-    public async Task<string?> SuggestHeadlineAsync(Article article)
+    public async Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken)
     {
         string dateContext =
             $"""
@@ -66,7 +66,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
         {
             Temperature = 0.5f
         };
-        ClientResult<ChatCompletion>? chatCompletion = await chatClient.CompleteChatAsync(messages, options);
+        ClientResult<ChatCompletion>? chatCompletion = await chatClient.CompleteChatAsync(messages, options, cancellationToken);
 
         return chatCompletion.Value.Content.FirstOrDefault()?.Text;
     }

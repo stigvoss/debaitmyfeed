@@ -1,12 +1,12 @@
 using AngleSharp;
 using AngleSharp.Dom;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DebaitMyFeed.Library.Debaiters.Dr;
 
 public class DrFeedDebaiter(
-    IMemoryCache cache,
+    IFusionCache cache,
     ILogger<DrFeedDebaiter> logger)
     : FeedDebaiter(cache, logger)
 {

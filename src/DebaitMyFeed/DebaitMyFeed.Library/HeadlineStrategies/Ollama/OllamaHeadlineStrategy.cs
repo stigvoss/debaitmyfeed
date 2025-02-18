@@ -22,7 +22,7 @@ public class OllamaHeadlineStrategy : IHeadlineStrategy
     
     public byte MaxConcurrency => 2;
     
-    public async Task<string?> SuggestHeadlineAsync(Article article)
+    public async Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken)
     {
         string dateContext =
             $"""
@@ -64,7 +64,7 @@ public class OllamaHeadlineStrategy : IHeadlineStrategy
                 new Message(ChatRole.User, article.Text ?? string.Empty)
             ]
         };
-        ChatDoneResponseStream? response = await this.client.ChatAsync(request).StreamToEndAsync();
+        ChatDoneResponseStream? response = await this.client.ChatAsync(request, cancellationToken).StreamToEndAsync();
 
         return response?.Message.Content;
     }

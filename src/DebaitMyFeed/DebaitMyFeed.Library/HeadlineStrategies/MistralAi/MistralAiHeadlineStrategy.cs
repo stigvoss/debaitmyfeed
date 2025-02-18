@@ -23,7 +23,7 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
     
     public byte MaxConcurrency => 3;
 
-    public async Task<string?> SuggestHeadlineAsync(Article article)
+    public async Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken)
     {
         string dateContext =
             $"""
@@ -68,7 +68,7 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
             Temperature = 0.5m
         };
 
-        ChatCompletionResponse? response = await client.Completions.GetCompletionAsync(request);
+        ChatCompletionResponse? response = await client.Completions.GetCompletionAsync(request, cancellationToken);
 
         await Task.Delay(500);
 

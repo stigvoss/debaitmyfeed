@@ -1,3 +1,5 @@
+using DebaitMyFeed.Library.HeadlineStrategies;
+
 namespace DebaitMyFeed.Library.Debaiters;
 
 public interface IFeedDebaiter

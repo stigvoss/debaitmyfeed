@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,24 @@ if (builder.Configuration.GetSection("Ollama").Exists())
 {
     builder.Services.AddOptions<OllamaOptions>().Bind(builder.Configuration.GetSection("Ollama"));
     builder.Services.AddSingleton<IHeadlineStrategy, OllamaHeadlineStrategy>();
+}
+
+IFusionCacheBuilder fusionCacheBuilder = builder.Services
+    .AddFusionCache()
+    .WithRegisteredMemoryCache()
+    .WithSystemTextJsonSerializer()
+    .WithDefaultEntryOptions(options =>
+    {
+        options.SetDuration(TimeSpan.FromDays(1));
+        options.SetDistributedCacheDuration(TimeSpan.FromDays(7));
+    });
+
+if (builder.Configuration.GetSection("Redis").Exists())
+{
+    builder.Services.AddStackExchangeRedisCache(options 
+        => builder.Configuration.GetSection("Redis").Bind(options));
+
+    fusionCacheBuilder.WithRegisteredDistributedCache();
 }
 
 if (builder.Services.All(descriptor => descriptor.ServiceType != typeof(IHeadlineStrategy)))

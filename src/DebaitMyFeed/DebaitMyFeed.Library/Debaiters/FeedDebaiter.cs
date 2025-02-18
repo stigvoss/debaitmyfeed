@@ -1,18 +1,20 @@
 using System.ServiceModel.Syndication;
 using System.Text;
 using System.Xml;
+using DebaitMyFeed.Library.HeadlineStrategies;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DebaitMyFeed.Library.Debaiters;
 
 public abstract class FeedDebaiter : IFeedDebaiter
 {
-    private readonly IMemoryCache cache;
+    private readonly IFusionCache cache;
     private readonly ILogger<FeedDebaiter> logger;
 
     public FeedDebaiter(
-        IMemoryCache cache,
+        IFusionCache cache,
         ILogger<FeedDebaiter> logger)
     {
         this.cache = cache;
@@ -47,43 +49,41 @@ public abstract class FeedDebaiter : IFeedDebaiter
             {
                 MaxDegreeOfParallelism = strategy.MaxConcurrency
             }, 
-            async (item, _) =>
+            async (item, token) =>
         {
             string cacheKey = $"{strategy.Id}:{item.Id}";
             
-            if (cache.TryGetValue(cacheKey, out string? cachedHeadline))
+            if (item.Links.FirstOrDefault()?.Uri is not Uri uri)
             {
-                item.Title = new TextSyndicationContent(cachedHeadline);
+                return;
             }
-            else
+
+            try
             {
-                if (item.Links.FirstOrDefault()?.Uri is not Uri uri)
-                {
-                    return;
-                }
-
-                try
-                {
-                    Article article = await GetArticleAsync(item.Title.Text, item.PublishDate, uri);
-
-                    string? headline = (await strategy.SuggestHeadlineAsync(article))?.TrimEnd('.');
-
-                    // Indicate that the article requires a subscription in the headline.
-                    if (article.RequiresSubscription)
+                string? headline = await this.cache.GetOrSetAsync<string?>(
+                    cacheKey,
+                    async (_, cancellationToken) =>
                     {
-                        headline = $"\ud83d\udd12 {headline}";
-                    }
+                        Article article = await GetArticleAsync(item.Title.Text, item.PublishDate, uri);
 
-                    cache.Set(cacheKey, headline, TimeSpan.FromDays(7));
+                        string? headline = (await strategy.GetHeadlineAsync(article, cancellationToken))?.TrimEnd('.');
 
-                    item.Title = new TextSyndicationContent(headline);
+                        // Indicate that the article requires a subscription in the headline.
+                        if (article.RequiresSubscription)
+                        {
+                            headline = $"\ud83d\udd12 {headline}";
+                        }
+
+                        return headline;
+                    }, token: token);
+            
+                item.Title = new TextSyndicationContent(headline);
                     
-                    this.logger.LogDebug("Debaited article {ArticleId} with headline {Headline}", item.Id, headline);
-                } 
-                catch (Exception ex)
-                {
-                    this.logger.LogError(ex, "Failed to debait article {ArticleId}", item.Id);
-                }
+                this.logger.LogDebug("Debaited article {ArticleId} with headline {Headline}", item.Id, headline);
+            } 
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Failed to debait article {ArticleId}", item.Id);
             }
         });
 
