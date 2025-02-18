@@ -9,7 +9,7 @@ public class OllamaOptions
 {
     public required Uri Endpoint { get; set; }
     
-    public required string Model { get; set; } = "deepseek-r1:1.5b";
+    public required string Model { get; set; } = "llama3.2";
 }
 
 public class OllamaHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
