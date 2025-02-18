@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: ./src/DebaitMyFeed
+      tags:
+        - debaitmyfeed:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      Strategy__Default: ollama
+      Ollama__Endpoint: http://ollama:11434
+      Ollama__Model: llama3.2
+      #MistralAi__ApiKey: ''
+      #MistralAi__Model: mistral-small-latest
+      #OpenAi__ApiKey: ''
+      #OpenAi__Model: gpt-4o-mini
+      Redis__Configuration: redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://dashboard:18889
+      OTEL_SERVICE_NAME: debaitmyfeed
+    networks:
+      - backend
+  dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    restart: unless-stopped
+    ports:
+      - "18888:18888"
+    networks:
+      - backend
+  redis:
+    image: redis
+    restart: unless-stopped
+    networks:
+      - backend
+  ollama:
+    image: ollama/ollama
+    restart: unless-stopped
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  ollama:
