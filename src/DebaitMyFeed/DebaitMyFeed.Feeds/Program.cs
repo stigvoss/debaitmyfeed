@@ -34,7 +34,7 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/{feedId}/{feedName}",
         async (
             [FromServices] DebaiterRegistry debaiterRegistry,
-            [FromServices] HeadlineStrategyRegistry suggestionStrategyRegistry,
+            [FromServices] HeadlineStrategyRegistry strategyRegistry,
             [FromServices] IOptions<ApiOptions> options,
             [FromRoute] string feedId,
             [FromRoute] string feedName,
@@ -47,7 +47,7 @@ app.MapGet("/{feedId}/{feedName}",
             
             try
             {
-                IHeadlineStrategy strategy = suggestionStrategyRegistry.GetStrategy(provider);
+                IHeadlineStrategy strategy = strategyRegistry.GetStrategy(provider);
                 
                 IFeedDebaiter debaiter = debaiterRegistry.GetDebaiter(feedId);
                 ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(strategy, feedName);
