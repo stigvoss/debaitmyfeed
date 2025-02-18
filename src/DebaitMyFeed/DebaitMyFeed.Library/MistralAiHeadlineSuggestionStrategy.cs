@@ -7,15 +7,20 @@ namespace DebaitMyFeed.Library;
 public class MistralAiOptions
 {
     public required string ApiKey { get; set; }
+    
+    public string Model { get; set; } = ModelDefinitions.MistralLarge;
 }
 
 public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
 {
     private readonly MistralClient client;
+    private readonly string model;
 
     public MistralAiHeadlineSuggestionStrategy(IOptions<MistralAiOptions> options)
     {
         MistralAiOptions mistralAiOptions = options.Value;
+        
+        this.model = mistralAiOptions.Model;
         
         APIAuthentication authentication = new APIAuthentication(mistralAiOptions.ApiKey);
         this.client = new MistralClient(authentication);
@@ -65,7 +70,7 @@ public class MistralAiHeadlineSuggestionStrategy : IHeadlineSuggestionStrategy
             new(ChatMessage.RoleEnum.User, article.Text)
         ];
         
-        ChatCompletionRequest request = new(ModelDefinitions.MistralLarge, messages)
+        ChatCompletionRequest request = new(this.model, messages)
         {
             Temperature = 0.5m
         };
