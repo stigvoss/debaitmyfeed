@@ -55,6 +55,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
             
             if (item.Links.FirstOrDefault()?.Uri is not Uri uri)
             {
+                // Skip debaiting headlines without a link as no article text can be fetched for generating a headline.
                 return;
             }
 
