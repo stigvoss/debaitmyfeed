@@ -5,19 +5,23 @@ using DebaitMyFeed.Library.HeadlineStrategies;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;
+using System.Net.Http;
 
 namespace DebaitMyFeed.Library.Debaiters;
 
 public abstract class FeedDebaiter : IFeedDebaiter
 {
+    protected readonly HttpClient client;
     private readonly IFusionCache cache;
     private readonly ILogger<FeedDebaiter> logger;
 
     public FeedDebaiter(
         IFusionCache cache,
+        IHttpClientFactory httpClientFactory,
         ILogger<FeedDebaiter> logger)
     {
         this.cache = cache;
+        this.client = httpClientFactory.CreateClient("Scraper");
         this.logger = logger;
     }
 
@@ -36,8 +40,7 @@ public abstract class FeedDebaiter : IFeedDebaiter
             throw new InvalidOperationException("Invalid feed name");
         }
         
-        HttpClient client = new HttpClient();
-        client.DefaultRequestHeaders.Add("User-Agent", "DebaitMyFeed/1.0");
+        this.client.DefaultRequestHeaders.Add("User-Agent", "DebaitMyFeed/1.0");
         Stream feedXml = await client.GetStreamAsync(feedUri);
         
         XmlReader reader = XmlReader.Create(feedXml);

@@ -11,6 +11,7 @@
       <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.1.0-preview.1.25064.3" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
       <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.1" />
       <PackageReference Include="Mistral.SDK" Version="2.0.1" />
       <PackageReference Include="OllamaSharp" Version="5.0.6" />

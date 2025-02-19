@@ -14,6 +14,11 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddLogging(options => options.AddConsole());
 
+builder.Services.AddHttpClient("Scraper", client =>
+{
+    client.DefaultRequestHeaders.Add("User-Agent", "DebaitMyFeed/1.0");
+});
+
 builder.AddOpenTelemetry();
 builder.AddFusionCache();
 builder.AddHeadlineStrategies();

@@ -7,8 +7,9 @@ namespace DebaitMyFeed.Library.Debaiters.Dr;
 
 public class DrFeedDebaiter(
     IFusionCache cache,
+    IHttpClientFactory httpClientFactory,
     ILogger<DrFeedDebaiter> logger)
-    : FeedDebaiter(cache, logger)
+    : FeedDebaiter(cache, httpClientFactory, logger)
 {
     public override string Id => "dr.dk";
     
@@ -57,8 +58,7 @@ public class DrFeedDebaiter(
 
     protected override async Task<Article> GetArticleAsync(string headline, DateTimeOffset published, Uri uri)
     {
-        HttpClient client = new HttpClient();
-        string result = await client.GetStringAsync(uri);
+        string result = await this.client.GetStringAsync(uri);
         
         IBrowsingContext context = BrowsingContext.New();
         IDocument document = await context.OpenAsync(req => req.Content(result));

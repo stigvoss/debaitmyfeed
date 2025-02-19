@@ -7,8 +7,9 @@ namespace DebaitMyFeed.Library.Debaiters.SonderborgNyt;
 
 public class SonderborgNytDebaiter(
     IFusionCache cache,
-    ILogger<FeedDebaiter> logger)
-    : FeedDebaiter(cache, logger)
+    IHttpClientFactory httpClientFactory,
+    ILogger<SonderborgNytDebaiter> logger)
+    : FeedDebaiter(cache, httpClientFactory, logger)
 {
     public override string Id => "sonderborgnyt.dk";
 
@@ -19,9 +20,7 @@ public class SonderborgNytDebaiter(
 
     protected override async Task<Article> GetArticleAsync(string headline, DateTimeOffset published, Uri uri)
     {
-        HttpClient client = new HttpClient();
-        client.DefaultRequestHeaders.Add("User-Agent", "DebaitMyFeed/1.0");
-        string result = await client.GetStringAsync(uri);
+        string result = await this.client.GetStringAsync(uri);
 
         IBrowsingContext context = BrowsingContext.New();
         IDocument document = await context.OpenAsync(req => req.Content(result));
