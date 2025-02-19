@@ -59,7 +59,7 @@ public class JvFeedDebaiter(
         
         string articleResourceUrl = $"https://jv.dk/jfm-load-article-content/{articleId}";
         
-        string articleResult = await client.GetStringAsync(articleResourceUrl);
+        string articleResult = await this.client.GetStringAsync(articleResourceUrl);
 
         IBrowsingContext articleContext = BrowsingContext.New();
         IDocument articleDocument = await articleContext.OpenAsync(req => req.Content(articleResult));
