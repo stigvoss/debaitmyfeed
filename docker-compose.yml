@@ -27,6 +27,8 @@ services:
     restart: unless-stopped
     ports:
       - "18888:18888"
+    #environment:
+      #Dashboard__Frontend__BrowserToken: ''
     networks:
       - backend
   redis:
