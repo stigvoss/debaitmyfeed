@@ -8,6 +8,7 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
 {
     private readonly MistralClient client;
     private readonly string model;
+    private readonly decimal temperature;
 
     public MistralAiHeadlineStrategy(IOptions<MistralAiOptions> options)
     {
@@ -17,6 +18,8 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
         
         APIAuthentication authentication = new APIAuthentication(mistralAiOptions.ApiKey);
         this.client = new MistralClient(authentication);
+        
+        this.temperature = mistralAiOptions.Temperature;
     }
 
     public string Id => "mistralai";
@@ -65,7 +68,7 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
         
         ChatCompletionRequest request = new(this.model, messages)
         {
-            Temperature = 0.5m
+            Temperature = this.temperature
         };
 
         ChatCompletionResponse? response = await client.Completions.GetCompletionAsync(request, cancellationToken);

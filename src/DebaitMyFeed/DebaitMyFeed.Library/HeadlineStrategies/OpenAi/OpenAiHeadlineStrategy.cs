@@ -9,6 +9,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
 {
     private readonly OpenAIClient openAiClient;
     private readonly ChatClient chatClient;
+    private readonly float temperature;
 
     public OpenAiHeadlineStrategy(IOptions<OpenAiOptions> options)
     {
@@ -16,6 +17,8 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
         
         this.openAiClient = new OpenAIClient(openAiOptions.ApiKey);
         this.chatClient = this.openAiClient.GetChatClient(openAiOptions.Model);
+
+        this.temperature = openAiOptions.Temperature;
     }
 
     public string Id => "openai";
@@ -64,7 +67,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
 
         ChatCompletionOptions options = new()
         {
-            Temperature = 0.5f
+            Temperature = this.temperature
         };
         ClientResult<ChatCompletion>? chatCompletion = await chatClient.CompleteChatAsync(messages, options, cancellationToken);
 

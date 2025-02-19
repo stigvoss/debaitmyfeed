@@ -13,8 +13,10 @@ services:
       Ollama__Model: llama3.2
       #MistralAi__ApiKey: ''
       #MistralAi__Model: mistral-small-latest
+      #MistralAi__Temperature: 0.5
       #OpenAi__ApiKey: ''
       #OpenAi__Model: gpt-4o-mini
+      #OpenAi__Temperature: 0.5
       Redis__Configuration: redis:6379
       OTEL_EXPORTER_OTLP_ENDPOINT: http://dashboard:18889
       OTEL_SERVICE_NAME: debaitmyfeed
