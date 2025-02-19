@@ -8,16 +8,22 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # Optional, the default strategy to use, if none is given in the request.
+      # First registered strategy will be used if not set. 
+      # Options: ollama, mistral, openai
       Strategy__Default: ollama
+      # Any single strategy provider is optional, but at least one must be configured.
       Ollama__Endpoint: http://ollama:11434
       Ollama__Model: llama3.2
-      #MistralAi__ApiKey: ''
-      #MistralAi__Model: mistral-small-latest
-      #MistralAi__Temperature: 0.5
-      #OpenAi__ApiKey: ''
-      #OpenAi__Model: gpt-4o-mini
-      #OpenAi__Temperature: 0.5
+      # MistralAi__ApiKey: ''
+      # MistralAi__Model: mistral-small-latest
+      # MistralAi__Temperature: 0.5
+      # OpenAi__ApiKey: ''
+      # OpenAi__Model: gpt-4o-mini
+      # OpenAi__Temperature: 0.5
+      # Optional, configures Redis for caching headlines between restarts of the app. If not set, only memory cache will be used.
       Redis__Configuration: redis:6379
+      # Optional, configures OpenTelemetry. If not set, OpenTelemetry will not be enabled.
       OTEL_EXPORTER_OTLP_ENDPOINT: http://dashboard:18889
       OTEL_SERVICE_NAME: debaitmyfeed
     networks:
@@ -27,8 +33,16 @@ services:
     restart: unless-stopped
     ports:
       - "18888:18888"
-    #environment:
-      #Dashboard__Frontend__BrowserToken: ''
+    environment:
+      Dashboard__ApplicationName: DebaitMyFeed
+      Dashboard__Frontend__AuthMode: BrowserToken
+      # Optional, specifies the browser token to authenticate. If not set, a random token will be generated.
+      # Dashboard__Frontend__BrowserToken: ''
+      # Defaults to Unsecured. Unsecured should only be used for development.
+      # https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/dashboard/configuration?tabs=bash#otlp-authentication
+      Dashboard__Otlp__AuthMode: Unsecured
+      # Dashboard__Otlp__PrimaryApiKey: ''
+      # Dashboard__Otlp__SecondaryApiKey: ''
     networks:
       - backend
   redis:
