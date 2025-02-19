@@ -1,4 +1,4 @@
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.HeadlineStrategies;
 
 public class HeadlineStrategyRegistryOptions
 {

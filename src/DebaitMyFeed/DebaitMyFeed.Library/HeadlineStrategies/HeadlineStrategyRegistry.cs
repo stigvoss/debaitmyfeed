@@ -1,9 +1,8 @@
 using System.Collections.Immutable;
-using DebaitMyFeed.Library.HeadlineStrategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace DebaitMyFeed.Library;
+namespace DebaitMyFeed.Library.HeadlineStrategies;
 
 public class HeadlineStrategyRegistry
 {
