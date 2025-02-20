@@ -1,0 +1,29 @@
+version: 2
+registries:
+  nuget-org:
+    type: nuget-feed
+    url: https://api.nuget.org/v3/index.json
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/src/DebaitMyFeed"
+    reviewers:
+      - "stigvoss"
+    registries: "*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Europe/Copenhagen"
+    ignore: # Ignore major versions of framework-related libraries
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.AspNetCore.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Windows.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      dependencies:
+        patterns: 
+        - "*"
