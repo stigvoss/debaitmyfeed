@@ -110,3 +110,19 @@ The service is configured through environment variables.
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Yes      | none                   | Endpoint for OpenTelemetry.                                                                                                    |
 | `OTEL_SERVICE_NAME`           | Yes      | none                   | Service name for OpenTelemetry.                                                                                                |
 
+## Hosting
+
+The easiest way to host the service is the clone this repository and spinning up the provided docker compose file by running the following command from the repository root folder:
+
+```shell
+docker compose up -d --build
+```
+
+To update the service, simply pull the latest commit and re-run the above docker compose command.
+
+```shell
+git pull
+docker compose up -d --build
+```
+
+By default, the docker compose is configured to use Ollama. If you have compatible hardware, you may consider reading the [instructions here](https://hub.docker.com/r/ollama/ollama) on how to run Ollama with support for CUDA for NVIDIA GPUs or ROCM for AMD GPUs.
