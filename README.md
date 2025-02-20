@@ -6,15 +6,13 @@ you wish to consume.
 Upon passing through the proxy, the articles in the feed will be scraped and sent to an LLM to create a headline focused
 on being transparent and free of clickbait.
 
-## Supported LLMs
-
-- Mistral AI through [Mistral.SDK](https://github.com/tghamm/Mistral.SDK).
-- OpenAI through [OpenAI](https://github.com/openai/openai-dotnet)
-- Ollama through [OllamaSharp](https://github.com/awaescher/OllamaSharp)
-
 ## Supported RSS feeds
 
+Due to the nature of needing to scrape article content from sources, support for a source need to be added manually by inheriting from the abstract `FeedDebaiter` class.
+
 Currently, the LLM prompts are shaped to support Danish feed sources.
+
+The following sources are supported.
 
 ### [dr.dk](https://dr.dk/)
 
@@ -70,4 +68,45 @@ Currently, the LLM prompts are shaped to support Danish feed sources.
 | Feed Name | URL                    |
 |-----------|------------------------|
 | Nyheder   | /sonderborgnyt.dk/feed |
+
+## Supported LLMs
+
+- Mistral AI through [Mistral.SDK](https://github.com/tghamm/Mistral.SDK).
+- OpenAI through [OpenAI](https://github.com/openai/openai-dotnet)
+- Ollama through [OllamaSharp](https://github.com/awaescher/OllamaSharp)
+
+At least one LLM provider (called a "Headline Strategy") has to be configured.
+
+Any provider left out of the configuration will not be registered and therefore unavailable for use.
+
+A default strategy may be configured, if no default is configured and no provider is explicitly requested when calling a feed endpoint, the first registered provider will be used.
+
+### Caching headlines
+
+To save resources (in case of Ollama) or money (in case of a paid provider), headlines will be cached once per strategy used in memory and, if configured, in Redis. Caching in Redis helps to avoid re-requesting headlines if the service has been restarted.
+
+### Selecting a specific provider on request
+
+When consuming a feed from the service, it is possible to explicitly request a strategy to be used for generating headlines. Simply append the path with the following query string: `?provider=<strategy_id>`.
+
+Supported strategy IDs are: `mistralai`, `openai` and `ollama`, but only configured strategies are available.
+
+## Configuration
+
+The service is configured through environment variables.
+
+| Environment Variable          | Optional | Default Value          | Description                                                                                                                    |
+|-------------------------------|----------|------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `Strategy__Default`           | Yes      | none                   | The default strategy to use, if none is given in the request query string. If not set, first registered strategy will be used. |
+| `Ollama__Endpoint`            | Yes      | none                   | Endpoint for Ollama strategy provider.                                                                                         |
+| `Ollama__Model`               | Yes      | none                   | Model to use for Ollama strategy provider.                                                                                     |
+| `MistralAi__ApiKey`           | Yes      | none                   | API key for Mistral AI strategy provider.                                                                                      |
+| `MistralAi__Model`            | Yes      | `mistral-large-latest` | Model to use for Mistral AI strategy provider.                                                                                 |
+| `MistralAi__Temperature`      | Yes      | `0.5`                  | Temperature setting for Mistral AI strategy provider.                                                                          |
+| `OpenAi__ApiKey`              | Yes      | none                   | API key for OpenAI strategy provider.                                                                                          |
+| `OpenAi__Model`               | Yes      | `gpt-4o-mini`          | Model to use for OpenAI strategy provider.                                                                                     |
+| `OpenAi__Temperature`         | Yes      | `0.5`                  | Temperature setting for OpenAI strategy provider.                                                                              |
+| `Redis__Configuration`        | Yes      | none                   | Configuration for Redis caching.                                                                                               |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Yes      | none                   | Endpoint for OpenTelemetry.                                                                                                    |
+| `OTEL_SERVICE_NAME`           | Yes      | none                   | Service name for OpenTelemetry.                                                                                                |
 
