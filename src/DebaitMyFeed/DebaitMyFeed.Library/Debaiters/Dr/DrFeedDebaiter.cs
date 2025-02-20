@@ -30,6 +30,7 @@ public class DrFeedDebaiter(
         { "kultur", false },
         { "musik", false },
         { "vejret", false },
+        { "regionale", false },
         { "kbh", true },
         { "bornholm", true },
         { "syd", true },
