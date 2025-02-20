@@ -99,7 +99,7 @@ The service is configured through environment variables.
 |-------------------------------|----------|------------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `Strategy__Default`           | Yes      | none                   | The default strategy to use, if none is given in the request query string. If not set, first registered strategy will be used. |
 | `Ollama__Endpoint`            | Yes      | none                   | Endpoint for Ollama strategy provider.                                                                                         |
-| `Ollama__Model`               | Yes      | none                   | Model to use for Ollama strategy provider.                                                                                     |
+| `Ollama__Model`               | Yes      | `llama3.2`             | Model to use for Ollama strategy provider.                                                                                     |
 | `MistralAi__ApiKey`           | Yes      | none                   | API key for Mistral AI strategy provider.                                                                                      |
 | `MistralAi__Model`            | Yes      | `mistral-large-latest` | Model to use for Mistral AI strategy provider.                                                                                 |
 | `MistralAi__Temperature`      | Yes      | `0.5`                  | Temperature setting for Mistral AI strategy provider.                                                                          |
