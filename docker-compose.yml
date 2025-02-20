@@ -26,6 +26,8 @@ services:
       # Optional, configures OpenTelemetry. If not set, OpenTelemetry will not be enabled.
       OTEL_EXPORTER_OTLP_ENDPOINT: http://dashboard:18889
       OTEL_SERVICE_NAME: debaitmyfeed
+      # Optional, configures OpenTelemetry headers for authentication with Aspire Dashboard.
+      # OTEL_EXPORTER_OTLP_HEADERS: 'X-OTLP-API-Key=<OTLP_API_KEY>'
     networks:
       - backend
   dashboard:
@@ -41,8 +43,8 @@ services:
       # Defaults to Unsecured. Unsecured should only be used for development.
       # https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/dashboard/configuration?tabs=bash#otlp-authentication
       Dashboard__Otlp__AuthMode: Unsecured
-      # Dashboard__Otlp__PrimaryApiKey: ''
-      # Dashboard__Otlp__SecondaryApiKey: ''
+      # Dashboard__Otlp__PrimaryApiKey: '<OTLP_API_KEY>'
+      # Dashboard__Otlp__SecondaryApiKey: '<OTLP_API_KEY>'
     networks:
       - backend
   redis:
