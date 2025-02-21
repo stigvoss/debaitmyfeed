@@ -58,12 +58,14 @@ app.MapGet("/{sourceId}/{feedId}",
             } 
             catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(new ProblemDetails
+                return Results.Json(new ProblemDetails
                 {
                     Title = "The request could not be processed",
                     Detail = ex.Message,
                     Status = StatusCodes.Status400BadRequest
-                });
+                },
+                statusCode: StatusCodes.Status400BadRequest,
+                contentType: "application/problem+json");
             }
         })
     .WithName("DebaitFeed")
