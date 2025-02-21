@@ -11,8 +11,8 @@ updates:
     registries: "*"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "03:00"
+      day: "friday"
+      time: "15:00"
       timezone: "Europe/Copenhagen"
     ignore: # Ignore major versions of framework-related libraries
       - dependency-name: "Microsoft.Extensions.*"
