@@ -33,32 +33,35 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/{feedId}/{feedName}",
+app.MapGet("/{sourceId}/{feedId}",
         async (
             [FromServices] DebaiterRegistry debaiterRegistry,
             [FromServices] HeadlineStrategyRegistry strategyRegistry,
             [FromServices] IOptions<HeadlineStrategyRegistryOptions> options,
+            [FromRoute] string sourceId,
             [FromRoute] string feedId,
-            [FromRoute] string feedName,
-            [FromQuery] string? provider = null) =>
+            [FromQuery(Name = "provider")] string? providerId = null) =>
         {
-            if (string.IsNullOrWhiteSpace(provider))
+            if (string.IsNullOrWhiteSpace(providerId))
             {
-                provider = options.Value.Default;
+                providerId = options.Value.Default;
             }
             
             try
             {
-                IHeadlineStrategy strategy = strategyRegistry.GetStrategy(provider);
+                IHeadlineStrategy strategy = strategyRegistry.GetStrategy(providerId);
                 
-                IFeedDebaiter debaiter = debaiterRegistry.GetDebaiter(feedId);
-                ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(strategy, feedName);
+                IFeedDebaiter debaiter = debaiterRegistry.GetDebaiter(sourceId);
+                ReadOnlyMemory<byte> feed = await debaiter.DebaitFeedAsync(strategy, feedId);
 
                 return Results.Bytes(feed, "application/rss+xml");
             } 
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(e.Message);
+                return Results.Problem(
+                    title: "The request could not be processed",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status400BadRequest);
             }
         })
     .WithName("DebaitFeed")
