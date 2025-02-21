@@ -56,9 +56,14 @@ app.MapGet("/{sourceId}/{feedId}",
 
                 return Results.Bytes(feed, "application/rss+xml");
             } 
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(e.Message);
+                return Results.BadRequest(new ProblemDetails
+                {
+                    Title = "The request could not be processed",
+                    Detail = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
             }
         })
     .WithName("DebaitFeed")
