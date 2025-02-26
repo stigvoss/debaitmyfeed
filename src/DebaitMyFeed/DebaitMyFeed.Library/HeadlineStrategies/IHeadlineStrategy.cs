@@ -6,5 +6,5 @@ public interface IHeadlineStrategy
     
     public byte MaxConcurrency { get; }
     
-    public Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken);
+    public Task<string?> GetHeadlineAsync(FeedArticle article, CancellationToken cancellationToken);
 }

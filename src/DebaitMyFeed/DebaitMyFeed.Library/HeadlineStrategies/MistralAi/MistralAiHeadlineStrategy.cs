@@ -26,7 +26,7 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
     
     public byte MaxConcurrency => 3;
 
-    public async Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken)
+    public async Task<string?> GetHeadlineAsync(FeedArticle article, CancellationToken cancellationToken)
     {
         string dateContext =
             $"""

@@ -22,7 +22,7 @@ public class OllamaHeadlineStrategy : IHeadlineStrategy
     
     public byte MaxConcurrency => 2;
     
-    public async Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken)
+    public async Task<string?> GetHeadlineAsync(FeedArticle article, CancellationToken cancellationToken)
     {
         string dateContext =
             $"""

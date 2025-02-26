@@ -25,7 +25,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
 
     public byte MaxConcurrency => 5;
 
-    public async Task<string?> GetHeadlineAsync(Article article, CancellationToken cancellationToken)
+    public async Task<string?> GetHeadlineAsync(FeedArticle article, CancellationToken cancellationToken)
     {
         string dateContext =
             $"""

@@ -1,7 +1,4 @@
 using DebaitMyFeed.Library.Debaiters;
-using DebaitMyFeed.Library.Debaiters.Dr;
-using DebaitMyFeed.Library.Debaiters.Jv;
-using DebaitMyFeed.Library.Debaiters.SonderborgNyt;
 using DebaitMyFeed.Library.HeadlineStrategies;
 using DebaitMyFeed.Library.HeadlineStrategies.MistralAi;
 using DebaitMyFeed.Library.HeadlineStrategies.Ollama;
@@ -131,10 +128,7 @@ internal static class HostApplicationBuilderExtensions
     /// <returns></returns>
     internal static IHostApplicationBuilder AddDebaiters(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<IFeedDebaiter, DrFeedDebaiter>();
-        builder.Services.AddSingleton<IFeedDebaiter, JvFeedDebaiter>();
-        builder.Services.AddSingleton<IFeedDebaiter, SonderborgNytDebaiter>();
-        builder.Services.AddSingleton<DebaiterRegistry>();
+        builder.Services.AddSingleton<FeedDebaiter>();
         
         return builder;
     }
