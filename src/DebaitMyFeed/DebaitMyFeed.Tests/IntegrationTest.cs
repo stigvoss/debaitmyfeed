@@ -30,8 +30,9 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
             Timeout = (int)TimeSpan.FromMinutes(2).TotalMilliseconds
         });
         
-        Assert.Equal("application/rss+xml", response.Headers["content-type"]);
         Assert.Equal(200, response.Status);
+        Assert.True(response.Headers.ContainsKey("content-type"));
+        Assert.Equal("application/rss+xml", response.Headers["content-type"]);
     }
     
     [Fact]
@@ -46,11 +47,20 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
             Timeout = (int)TimeSpan.FromMinutes(2).TotalMilliseconds
         });
         
-        Assert.Equal("application/rss+xml", response.Headers["content-type"]);
         Assert.Equal(200, response.Status);
+        Assert.True(response.Headers.ContainsKey("content-type"));
+        Assert.Equal("application/rss+xml", response.Headers["content-type"]);
     }
 
     public override async Task InitializeAsync()
+    {
+        IFutureDockerImage image = await BuildApiImage();
+        this.apiContainer = await StartApiContainer(image.FullName);
+
+        await base.InitializeAsync();
+    }
+
+    private async Task<IContainer> StartApiContainer(string imageName)
     {
         IConfiguration configuration = new ConfigurationBuilder()
             .AddEnvironmentVariables()
@@ -59,14 +69,11 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
         ApiKeyOptions options = new();
         configuration.GetSection("ApiKeys").Bind(options);
         
-        IFutureDockerImage image = await BuildApiImage();
-        this.apiContainer = await StartApiContainer(image.FullName, options);
-
-        await base.InitializeAsync();
-    }
-
-    private async Task<IContainer> StartApiContainer(string imageName, ApiKeyOptions options)
-    {
+        if (string.IsNullOrWhiteSpace(options.OpenAiApiKey) || string.IsNullOrWhiteSpace(options.MistralAiApiKey))
+        {
+            throw new InvalidOperationException("API keys are missing");
+        }
+        
         var container = new ContainerBuilder()
             .WithImage(imageName)
             .WithEnvironment("Default__Strategy", "openai")
