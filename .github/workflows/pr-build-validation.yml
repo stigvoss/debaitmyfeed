@@ -23,6 +23,8 @@ jobs:
       run: dotnet restore src/DebaitMyFeed/
     - name: Build
       run: dotnet build --no-restore src/DebaitMyFeed/
+    - name: Ensure browsers are installed
+      run: pwsh src/DebaitMyFeed/DebaitMyFeed.Tests/bin/Debug/net8.0/playwright.ps1 install --with-deps
     - name: Test
       env:
         ApiKeys__OpenAiApiKey: ${{ secrets.APIKEYS__OPENAIAPIKEY }}
