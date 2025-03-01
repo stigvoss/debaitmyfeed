@@ -24,4 +24,4 @@ jobs:
     - name: Build
       run: dotnet build --no-restore src/DebaitMyFeed/
     - name: Test
-      run: dotnet test --no-build --verbosity normal src/DebaitMyFeed/
+      run: ApiKeys__OpenAiApiKey=${{ vars.APIKEYS__OPENAIAPIKEY }} ApiKeys__MistralAiApiKey=${{ vars.APIKEYS__MISTRALAIAPIKEY }} dotnet test --no-build --verbosity normal src/DebaitMyFeed/
