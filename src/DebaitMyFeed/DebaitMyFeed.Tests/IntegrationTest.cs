@@ -27,7 +27,7 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
         IAPIResponse response = await Context.APIRequest.GetAsync(endpointUrl, new()
         {
             // The first run takes a while as nothing is cached in Redis all articles need to be processed by the LLM.
-            Timeout = (int)TimeSpan.FromMinutes(2).TotalMilliseconds
+            Timeout = (int)TimeSpan.FromMinutes(4).TotalMilliseconds
         });
         
         Assert.Equal(200, response.Status);
@@ -44,7 +44,7 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
         IAPIResponse response = await Context.APIRequest.GetAsync(endpointUrl, new()
         {
             // The first run takes a while as nothing is cached in Redis all articles need to be processed by the LLM.
-            Timeout = (int)TimeSpan.FromMinutes(2).TotalMilliseconds
+            Timeout = (int)TimeSpan.FromMinutes(4).TotalMilliseconds
         });
         
         Assert.Equal(200, response.Status);
