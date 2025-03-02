@@ -4,11 +4,13 @@
 name: PR Build Validation
 
 on:
+  workflow_dispatch: 
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-test:
+    name: Build and Test
 
     runs-on: ubuntu-latest
 
@@ -20,5 +22,12 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore src/DebaitMyFeed/
-    - name: Build
+    - name: Build project
       run: dotnet build --no-restore src/DebaitMyFeed/
+    - name: Install Playwright
+      run: pwsh src/DebaitMyFeed/DebaitMyFeed.Tests/bin/Debug/net8.0/playwright.ps1 install --with-deps
+    - name: Run tests
+      env:
+        ApiKeys__OpenAiApiKey: ${{ secrets.APIKEYS__OPENAIAPIKEY }}
+        ApiKeys__MistralAiApiKey: ${{ secrets.APIKEYS__MISTRALAIAPIKEY }}
+      run: dotnet test --no-build --verbosity normal src/DebaitMyFeed/
