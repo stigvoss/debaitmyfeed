@@ -9,6 +9,7 @@ namespace DebaitMyFeed.Tests;
 [Collection("DockerCollection")]
 public class IntegrationTest : ContextTest, IClassFixture<AppContainerFixture>, IClassFixture<RedisContainerFixture>
 {
+    // The Redis fixture is injected, even if it is not used, to ensure that the container is created and started.
     private readonly RedisContainer? redis;
     private readonly IContainer? app;
 
