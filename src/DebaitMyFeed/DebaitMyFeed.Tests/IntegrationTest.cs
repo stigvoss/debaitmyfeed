@@ -1,27 +1,29 @@
-using DotNet.Testcontainers.Builders;
+using DebaitMyFeed.Tests.Fixtures;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Testcontainers.Redis;
 
 namespace DebaitMyFeed.Tests;
 
-public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
+[Collection("DockerCollection")]
+public class IntegrationTest : ContextTest, IClassFixture<AppContainerFixture>, IClassFixture<RedisContainerFixture>
 {
-    private readonly RedisContainer redisContainer;
-    private IContainer apiContainer;
+    private readonly RedisContainer? redis;
+    private readonly IContainer? app;
 
-    public IntegrationTest(RedisContainerFixture fixture)
+    public IntegrationTest(AppContainerFixture appFixture, RedisContainerFixture redisFixture)
     {
-        this.redisContainer = fixture.Container;
+        this.redis = redisFixture.Container;
+        this.app = appFixture.Container;
     }
     
     [Fact]
     public async Task OpenAiTest()
     {
-        Uri baseUri = new($"http://{this.apiContainer.Hostname}:{this.apiContainer.GetMappedPublicPort(8080)}");
+        Assert.NotNull(this.app);
+        
+        Uri baseUri = new($"http://{this.app.Hostname}:{this.app.GetMappedPublicPort(8080)}");
         string endpointUrl = new Uri(baseUri, "/dr.dk/indland").ToString();
         
         IAPIResponse response = await Context.APIRequest.GetAsync(endpointUrl, new()
@@ -38,7 +40,9 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
     [Fact]
     public async Task MistralAiTest()
     {
-        Uri baseUri = new($"http://{this.apiContainer.Hostname}:{this.apiContainer.GetMappedPublicPort(8080)}");
+        Assert.NotNull(this.app);
+        
+        Uri baseUri = new($"http://{this.app.Hostname}:{this.app.GetMappedPublicPort(8080)}");
         string endpointUrl = new Uri(baseUri, "/dr.dk/indland?provider=mistralai").ToString();
         
         IAPIResponse response = await Context.APIRequest.GetAsync(endpointUrl, new()
@@ -50,60 +54,5 @@ public class IntegrationTest : ContextTest, IClassFixture<RedisContainerFixture>
         Assert.Equal(200, response.Status);
         Assert.True(response.Headers.ContainsKey("content-type"));
         Assert.Equal("application/rss+xml", response.Headers["content-type"]);
-    }
-
-    public override async Task InitializeAsync()
-    {
-        IFutureDockerImage image = await BuildApiImage();
-        this.apiContainer = await StartApiContainer(image.FullName);
-
-        await base.InitializeAsync();
-    }
-
-    private async Task<IContainer> StartApiContainer(string imageName)
-    {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .Build();
-        
-        ApiKeyOptions options = new();
-        configuration.GetSection("ApiKeys").Bind(options);
-        
-        if (string.IsNullOrWhiteSpace(options.OpenAiApiKey) || string.IsNullOrWhiteSpace(options.MistralAiApiKey))
-        {
-            throw new InvalidOperationException("API keys are missing");
-        }
-        
-        var container = new ContainerBuilder()
-            .WithImage(imageName)
-            .WithEnvironment("Default__Strategy", "openai")
-            .WithEnvironment("OpenAi__ApiKey", options.OpenAiApiKey)
-            .WithEnvironment("MistralAi__ApiKey", options.MistralAiApiKey)
-            .WithEnvironment("Redis__Configuration", this.redisContainer.GetConnectionString())
-            .WithPortBinding(8080, true)
-            .WithReuse(true)
-            .Build();
-        await container.StartAsync();
-        return container;
-    }
-
-    private async Task<IFutureDockerImage> BuildApiImage()
-    {
-        DockerImage imageName = new("debaitmyfeed-api", tag: "integration-testing");
-        IFutureDockerImage? image = new ImageFromDockerfileBuilder()
-            .WithDockerfile("Dockerfile")
-            .WithDockerfileDirectory("../../../../")
-            .WithName(imageName)
-            .WithCleanUp(true)
-            .WithDeleteIfExists(true)
-            .Build();
-        await image.CreateAsync();
-        
-        if (image is null)
-        {
-            throw new InvalidOperationException("Failed to build the API image");
-        }
-
-        return image;
     }
 }
