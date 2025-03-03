@@ -1,9 +1,8 @@
 namespace DebaitMyFeed.Tests.Fixtures;
 
+/// <summary>
+/// A collection is created to share the network fixture between all tests.
+/// This ensures that all other fixtures can use the same network by injecting the network fixture.
+/// </summary>
 [CollectionDefinition("DockerCollection")]
-public class DockerCollection : ICollectionFixture<NetworkFixture>
-{
-    // This class has no code and is never created. 
-    // Its purpose is simply to be the place to apply [CollectionDefinition]
-    // and all the ICollectionFixture<> interfaces.
-}
+public class DockerCollection : ICollectionFixture<NetworkFixture>;
