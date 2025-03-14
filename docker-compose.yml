@@ -31,7 +31,7 @@ services:
     networks:
       - backend
   dashboard:
-    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.1
     restart: unless-stopped
     ports:
       - "18888:18888"
