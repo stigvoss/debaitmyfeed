@@ -63,6 +63,13 @@ app.MapGet("/{sourceId}/{feedId}",
                     detail: ex.Message,
                     statusCode: StatusCodes.Status400BadRequest);
             }
+            catch (Exception ex)
+            {
+                return Results.Problem(
+                    title: "An unexpected error occurred",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
         })
     .WithName("DebaitFeed")
     .WithOpenApi();
