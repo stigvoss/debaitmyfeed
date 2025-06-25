@@ -38,6 +38,9 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
                 The user will provide the article text.
                 You will use the text to generate a clear, precise, specific, and descriptive headline for the article that is free from clickbait.
                 </role>
+                <goal>
+                Concisely inform the reader about the content of the news. The reader should be able to understand the context of the news only by the title.
+                </goal>
                 <rules>
                 1. Focus on the key points in the article.
                 2. The tone of the headline should be neutral.
