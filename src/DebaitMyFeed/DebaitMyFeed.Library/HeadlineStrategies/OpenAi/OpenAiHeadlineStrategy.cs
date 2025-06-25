@@ -58,7 +58,6 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
                 Artiklens sprog er: {article.ArticleLanguage}.
                 Den originale kilde til artiklen er: {article.Source}.
                 Den originale overskrift til artiklen er: {article.Headline}.
-                Du må bruge den originale overskrift som inspiration til din overskrift, men husk at holde dig til de tidligere instruktioner.
             """;
         
         var messages = new List<ChatMessage>
