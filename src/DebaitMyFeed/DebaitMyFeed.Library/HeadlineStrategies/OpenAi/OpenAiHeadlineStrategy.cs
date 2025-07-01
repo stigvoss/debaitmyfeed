@@ -51,6 +51,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
                 7. If the article mentions widely known organizations or companies, consider including the name in the headline, as long as it is relevant to the core content of the article.
                 8. Use *ONLY* the article’s original language when creating the headline.
                 9. You will *ONLY* provide the headline, nothing else in your response.
+                10. If the article language is not English, *DO NOT* use the English word "amid".
                 </rules>
                 Wait. Are you following all the rules for your role?
             """;
