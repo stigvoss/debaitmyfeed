@@ -29,7 +29,7 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
     {
         string dateContext =
             $"""
-                Nuværende dato og klokkeslæt er {DateTimeOffset.Now:o}.
+                The current date and time is: {DateTimeOffset.Now:o}.
             """;
         
         string instructionsPrompt = 
@@ -58,10 +58,10 @@ public class OpenAiHeadlineStrategy : IHeadlineStrategy
 
         string articleContext =
             $"""
-                Aritklen var udgivet på dette tidspunkt: {article.Published:o}.
-                Artiklens sprog er: {article.ArticleLanguage}.
-                Den originale kilde til artiklen er: {article.Source}.
-                Den originale overskrift til artiklen er: {article.Headline}.
+                The article was published at: {article.Published:o}.
+                The language of the article is: {article.ArticleLanguage}.
+                The original source of the article is: {article.Source}.
+                The original title of the article is: {article.Headline}.
             """;
         
         var messages = new List<ChatMessage>
