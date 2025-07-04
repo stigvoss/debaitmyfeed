@@ -14,8 +14,8 @@
       <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.6" />
       <PackageReference Include="Mistral.SDK" Version="2.2.0" />
-      <PackageReference Include="OllamaSharp" Version="5.2.3" />
-      <PackageReference Include="OpenAI" Version="2.1.0" />
+      <PackageReference Include="OllamaSharp" Version="5.2.6" />
+      <PackageReference Include="OpenAI" Version="2.2.0" />
       <PackageReference Include="System.Memory.Data" Version="9.0.6" />
       <PackageReference Include="System.ServiceModel.Syndication" Version="9.0.6" />
       <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.3.0" />
