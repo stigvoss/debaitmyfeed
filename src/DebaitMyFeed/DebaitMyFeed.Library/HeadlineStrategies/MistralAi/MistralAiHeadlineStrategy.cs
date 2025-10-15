@@ -53,6 +53,7 @@ public class MistralAiHeadlineStrategy : IHeadlineStrategy
                 8. Use *ONLY* the article’s original language when creating the headline.
                 9. You will *ONLY* provide the headline, nothing else in your response.
                 10. If the article language is not English, *DO NOT* use the English word "amid".
+                11. DO NOT apply markdown formatting to the titles.
                 </rules>
                 Wait. Are you following all the rules for your role?
             """;
