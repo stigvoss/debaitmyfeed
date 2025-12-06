@@ -22,7 +22,7 @@
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-    <PackageReference Include="OllamaSharp" Version="5.4.11" />
+    <PackageReference Include="OllamaSharp" Version="5.4.12" />
     <PackageReference Include="OpenAI" Version="2.7.0" />
     <PackageReference Include="System.Memory.Data" Version="10.0.0" />
       <ProjectReference Include="..\DebaitMyFeed.Library\DebaitMyFeed.Library.csproj" />
