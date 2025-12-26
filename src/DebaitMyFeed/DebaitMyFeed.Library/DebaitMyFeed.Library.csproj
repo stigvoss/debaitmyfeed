@@ -18,8 +18,8 @@
       <PackageReference Include="OpenAI" Version="2.8.0" />
       <PackageReference Include="System.Memory.Data" Version="10.0.1" />
       <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.1" />
-      <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.4.0" />
-      <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.4.0" />
+      <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.5.0" />
+      <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.5.0" />
     </ItemGroup>
 
 </Project>
