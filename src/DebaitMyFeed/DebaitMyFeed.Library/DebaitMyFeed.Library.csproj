@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="AngleSharp" Version="1.4.0" />
-      <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.0" />
+      <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.2" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.7" />
       <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.7" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
