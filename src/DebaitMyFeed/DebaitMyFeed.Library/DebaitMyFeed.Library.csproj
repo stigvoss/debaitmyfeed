@@ -7,17 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AngleSharp" Version="1.5.1" />
-      <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.7.0" />
-      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9" />
-      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
-      <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
+      <PackageReference Include="AngleSharp" Version="1.5.2" />
+      <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.8.1" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.10" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.10" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.10" />
       <PackageReference Include="Mistral.SDK" Version="2.3.1" />
-      <PackageReference Include="OllamaSharp" Version="5.4.25" />
+      <PackageReference Include="OllamaSharp" Version="5.4.30" />
       <PackageReference Include="OpenAI" Version="2.12.0" />
-      <PackageReference Include="System.Memory.Data" Version="10.0.9" />
-      <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.9" />
+      <PackageReference Include="System.Memory.Data" Version="10.0.10" />
+      <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.10" />
       <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.6.0" />
       <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.6.0" />
     </ItemGroup>
